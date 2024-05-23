@@ -1,0 +1,7 @@
+a LOVE 1
+b LOVE 2
+z LOVE 3
+
+answer LOVE a * z - b
+
+show answer

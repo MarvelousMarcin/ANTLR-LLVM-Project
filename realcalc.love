@@ -1,0 +1,7 @@
+a LOVE 1.0
+b LOVE 2.0
+z LOVE 3.0
+
+answer LOVE z / b + a
+
+show answer

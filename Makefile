@@ -2,5 +2,28 @@ build:
 	rm -rf ./lib
 	java -jar antlr-4.11.1-complete.jar -o lib -Dlanguage=Python3 LOVE.g4 
 
-compile:
-	python Driver.py input.love > text.ll
+
+string:
+	python Driver.py string.love > string.ll
+	lli string.ll
+
+simplecalc:
+	python Driver.py simplecalc.love > simplecalc.ll
+	lli simplecalc.ll
+
+realcalc:
+	python Driver.py realcalc.love > realcalc.ll
+	lli realcalc.ll
+
+readwrite:
+	python Driver.py readwrite.love > readwrite.ll
+	lli readwrite.ll
+
+array:
+	python Driver.py array.love > array.ll
+	lli array.ll
+
+
+clean:
+	rm -f *.ll
+	rm -f *.class

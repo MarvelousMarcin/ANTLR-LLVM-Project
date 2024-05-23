@@ -53,6 +53,15 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#arrayAccess.
+    def enterArrayAccess(self, ctx:LOVEParser.ArrayAccessContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#arrayAccess.
+    def exitArrayAccess(self, ctx:LOVEParser.ArrayAccessContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#single0.
     def enterSingle0(self, ctx:LOVEParser.Single0Context):
         pass

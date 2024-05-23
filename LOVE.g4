@@ -7,6 +7,7 @@ stat: SHOW ID               #show
     | GET ID                #get
  	| ID 'LOVE' expr0	    #assign
     | ID 'LOVE' array       #assignArray
+    | ID '[' INT ']'        #arrayAccess
    ;
 
 expr0:  expr1			    #single0

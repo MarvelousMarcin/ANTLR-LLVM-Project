@@ -1,7 +1,0 @@
-a LOVE 5
-b LOVE 5
-y LOVE 13
-
-z LOVE a * b
-
-show z

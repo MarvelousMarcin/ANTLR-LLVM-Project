@@ -1,3 +1,7 @@
 input.love
 
 text.ll
+
+__pycache__ 
+
+./lib

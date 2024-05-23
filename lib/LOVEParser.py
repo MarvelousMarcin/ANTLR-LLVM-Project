@@ -10,32 +10,33 @@ else:
 
 def serializedATN():
     return [
-        4,1,18,79,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,1,0,3,
+        4,1,20,83,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,1,0,3,
         0,14,8,0,1,0,5,0,17,8,0,10,0,12,0,20,9,0,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,3,1,32,8,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,
-        2,43,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,54,8,3,1,4,1,4,
-        1,4,1,4,1,4,1,4,1,4,1,4,3,4,64,8,4,1,5,1,5,1,5,1,5,5,5,70,8,5,10,
-        5,12,5,73,9,5,3,5,75,8,5,1,5,1,5,1,5,0,0,6,0,2,4,6,8,10,0,0,87,0,
-        18,1,0,0,0,2,31,1,0,0,0,4,42,1,0,0,0,6,53,1,0,0,0,8,63,1,0,0,0,10,
-        65,1,0,0,0,12,14,3,2,1,0,13,12,1,0,0,0,13,14,1,0,0,0,14,15,1,0,0,
-        0,15,17,5,17,0,0,16,13,1,0,0,0,17,20,1,0,0,0,18,16,1,0,0,0,18,19,
-        1,0,0,0,19,1,1,0,0,0,20,18,1,0,0,0,21,22,5,8,0,0,22,32,5,9,0,0,23,
-        24,5,7,0,0,24,32,5,9,0,0,25,26,5,9,0,0,26,27,5,1,0,0,27,32,3,4,2,
-        0,28,29,5,9,0,0,29,30,5,1,0,0,30,32,3,10,5,0,31,21,1,0,0,0,31,23,
-        1,0,0,0,31,25,1,0,0,0,31,28,1,0,0,0,32,3,1,0,0,0,33,43,3,6,3,0,34,
-        35,3,6,3,0,35,36,5,12,0,0,36,37,3,4,2,0,37,43,1,0,0,0,38,39,3,6,
-        3,0,39,40,5,14,0,0,40,41,3,4,2,0,41,43,1,0,0,0,42,33,1,0,0,0,42,
-        34,1,0,0,0,42,38,1,0,0,0,43,5,1,0,0,0,44,54,3,8,4,0,45,46,3,8,4,
-        0,46,47,5,15,0,0,47,48,3,8,4,0,48,54,1,0,0,0,49,50,3,8,4,0,50,51,
-        5,13,0,0,51,52,3,8,4,0,52,54,1,0,0,0,53,44,1,0,0,0,53,45,1,0,0,0,
-        53,49,1,0,0,0,54,7,1,0,0,0,55,64,5,11,0,0,56,64,5,10,0,0,57,64,5,
-        9,0,0,58,64,5,16,0,0,59,60,5,2,0,0,60,61,3,4,2,0,61,62,5,3,0,0,62,
-        64,1,0,0,0,63,55,1,0,0,0,63,56,1,0,0,0,63,57,1,0,0,0,63,58,1,0,0,
-        0,63,59,1,0,0,0,64,9,1,0,0,0,65,74,5,4,0,0,66,71,5,11,0,0,67,68,
-        5,5,0,0,68,70,5,11,0,0,69,67,1,0,0,0,70,73,1,0,0,0,71,69,1,0,0,0,
-        71,72,1,0,0,0,72,75,1,0,0,0,73,71,1,0,0,0,74,66,1,0,0,0,74,75,1,
-        0,0,0,75,76,1,0,0,0,76,77,5,6,0,0,77,11,1,0,0,0,8,13,18,31,42,53,
-        63,71,74
+        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,36,8,1,1,2,1,2,1,2,1,2,1,2,1,
+        2,1,2,1,2,1,2,3,2,47,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,
+        58,8,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,68,8,4,1,5,1,5,1,5,1,
+        5,5,5,74,8,5,10,5,12,5,77,9,5,3,5,79,8,5,1,5,1,5,1,5,0,0,6,0,2,4,
+        6,8,10,0,0,92,0,18,1,0,0,0,2,35,1,0,0,0,4,46,1,0,0,0,6,57,1,0,0,
+        0,8,67,1,0,0,0,10,69,1,0,0,0,12,14,3,2,1,0,13,12,1,0,0,0,13,14,1,
+        0,0,0,14,15,1,0,0,0,15,17,5,19,0,0,16,13,1,0,0,0,17,20,1,0,0,0,18,
+        16,1,0,0,0,18,19,1,0,0,0,19,1,1,0,0,0,20,18,1,0,0,0,21,22,5,10,0,
+        0,22,36,5,11,0,0,23,24,5,9,0,0,24,36,5,11,0,0,25,26,5,11,0,0,26,
+        27,5,1,0,0,27,36,3,4,2,0,28,29,5,11,0,0,29,30,5,1,0,0,30,36,3,10,
+        5,0,31,32,5,11,0,0,32,33,5,2,0,0,33,34,5,13,0,0,34,36,5,3,0,0,35,
+        21,1,0,0,0,35,23,1,0,0,0,35,25,1,0,0,0,35,28,1,0,0,0,35,31,1,0,0,
+        0,36,3,1,0,0,0,37,47,3,6,3,0,38,39,3,6,3,0,39,40,5,14,0,0,40,41,
+        3,4,2,0,41,47,1,0,0,0,42,43,3,6,3,0,43,44,5,16,0,0,44,45,3,4,2,0,
+        45,47,1,0,0,0,46,37,1,0,0,0,46,38,1,0,0,0,46,42,1,0,0,0,47,5,1,0,
+        0,0,48,58,3,8,4,0,49,50,3,8,4,0,50,51,5,17,0,0,51,52,3,8,4,0,52,
+        58,1,0,0,0,53,54,3,8,4,0,54,55,5,15,0,0,55,56,3,8,4,0,56,58,1,0,
+        0,0,57,48,1,0,0,0,57,49,1,0,0,0,57,53,1,0,0,0,58,7,1,0,0,0,59,68,
+        5,13,0,0,60,68,5,12,0,0,61,68,5,11,0,0,62,68,5,18,0,0,63,64,5,4,
+        0,0,64,65,3,4,2,0,65,66,5,5,0,0,66,68,1,0,0,0,67,59,1,0,0,0,67,60,
+        1,0,0,0,67,61,1,0,0,0,67,62,1,0,0,0,67,63,1,0,0,0,68,9,1,0,0,0,69,
+        78,5,6,0,0,70,75,5,13,0,0,71,72,5,7,0,0,72,74,5,13,0,0,73,71,1,0,
+        0,0,74,77,1,0,0,0,75,73,1,0,0,0,75,76,1,0,0,0,76,79,1,0,0,0,77,75,
+        1,0,0,0,78,70,1,0,0,0,78,79,1,0,0,0,79,80,1,0,0,0,80,81,5,8,0,0,
+        81,11,1,0,0,0,8,13,18,35,46,57,67,75,78
     ]
 
 class LOVEParser ( Parser ):
@@ -48,14 +49,14 @@ class LOVEParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'LOVE'", "'('", "')'", "'{'", "','", 
-                     "'}'", "'get'", "'show'", "<INVALID>", "<INVALID>", 
-                     "<INVALID>", "'+'", "'/'", "'-'", "'*'" ]
+    literalNames = [ "<INVALID>", "'LOVE'", "'['", "']'", "'('", "')'", 
+                     "'{'", "','", "'}'", "'get'", "'show'", "<INVALID>", 
+                     "<INVALID>", "<INVALID>", "'+'", "'/'", "'-'", "'*'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "<INVALID>", "<INVALID>", "<INVALID>", "GET", "SHOW", 
-                      "ID", "REAL", "INT", "ADD", "DIV", "MINUS", "MULT", 
-                      "STRING", "NEWLINE", "WS" ]
+                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
+                      "<INVALID>", "GET", "SHOW", "ID", "REAL", "INT", "ADD", 
+                      "DIV", "MINUS", "MULT", "STRING", "NEWLINE", "WS" ]
 
     RULE_prog = 0
     RULE_stat = 1
@@ -73,18 +74,20 @@ class LOVEParser ( Parser ):
     T__3=4
     T__4=5
     T__5=6
-    GET=7
-    SHOW=8
-    ID=9
-    REAL=10
-    INT=11
-    ADD=12
-    DIV=13
-    MINUS=14
-    MULT=15
-    STRING=16
-    NEWLINE=17
-    WS=18
+    T__6=7
+    T__7=8
+    GET=9
+    SHOW=10
+    ID=11
+    REAL=12
+    INT=13
+    ADD=14
+    DIV=15
+    MINUS=16
+    MULT=17
+    STRING=18
+    NEWLINE=19
+    WS=20
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -139,11 +142,11 @@ class LOVEParser ( Parser ):
             self.state = 18
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while ((_la) & ~0x3f) == 0 and ((1 << _la) & 131968) != 0:
+            while ((_la) & ~0x3f) == 0 and ((1 << _la) & 527872) != 0:
                 self.state = 13
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if ((_la) & ~0x3f) == 0 and ((1 << _la) & 896) != 0:
+                if ((_la) & ~0x3f) == 0 and ((1 << _la) & 3584) != 0:
                     self.state = 12
                     self.stat()
 
@@ -241,6 +244,26 @@ class LOVEParser ( Parser ):
                 listener.exitShow(self)
 
 
+    class ArrayAccessContext(StatContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LOVEParser.StatContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def ID(self):
+            return self.getToken(LOVEParser.ID, 0)
+        def INT(self):
+            return self.getToken(LOVEParser.INT, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterArrayAccess" ):
+                listener.enterArrayAccess(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitArrayAccess" ):
+                listener.exitArrayAccess(self)
+
+
     class AssignContext(StatContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a LOVEParser.StatContext
@@ -268,7 +291,7 @@ class LOVEParser ( Parser ):
         localctx = LOVEParser.StatContext(self, self._ctx, self.state)
         self.enterRule(localctx, 2, self.RULE_stat)
         try:
-            self.state = 31
+            self.state = 35
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,2,self._ctx)
             if la_ == 1:
@@ -309,6 +332,19 @@ class LOVEParser ( Parser ):
                 self.match(LOVEParser.T__0)
                 self.state = 30
                 self.array()
+                pass
+
+            elif la_ == 5:
+                localctx = LOVEParser.ArrayAccessContext(self, localctx)
+                self.enterOuterAlt(localctx, 5)
+                self.state = 31
+                self.match(LOVEParser.ID)
+                self.state = 32
+                self.match(LOVEParser.T__1)
+                self.state = 33
+                self.match(LOVEParser.INT)
+                self.state = 34
+                self.match(LOVEParser.T__2)
                 pass
 
 
@@ -411,35 +447,35 @@ class LOVEParser ( Parser ):
         localctx = LOVEParser.Expr0Context(self, self._ctx, self.state)
         self.enterRule(localctx, 4, self.RULE_expr0)
         try:
-            self.state = 42
+            self.state = 46
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
             if la_ == 1:
                 localctx = LOVEParser.Single0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 33
+                self.state = 37
                 self.expr1()
                 pass
 
             elif la_ == 2:
                 localctx = LOVEParser.AddContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 34
+                self.state = 38
                 self.expr1()
-                self.state = 35
+                self.state = 39
                 self.match(LOVEParser.ADD)
-                self.state = 36
+                self.state = 40
                 self.expr0()
                 pass
 
             elif la_ == 3:
                 localctx = LOVEParser.SubstrContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 38
+                self.state = 42
                 self.expr1()
-                self.state = 39
+                self.state = 43
                 self.match(LOVEParser.MINUS)
-                self.state = 40
+                self.state = 44
                 self.expr0()
                 pass
 
@@ -543,35 +579,35 @@ class LOVEParser ( Parser ):
         localctx = LOVEParser.Expr1Context(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_expr1)
         try:
-            self.state = 53
+            self.state = 57
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,4,self._ctx)
             if la_ == 1:
                 localctx = LOVEParser.Single1Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 44
+                self.state = 48
                 self.expr2()
                 pass
 
             elif la_ == 2:
                 localctx = LOVEParser.MultContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 45
+                self.state = 49
                 self.expr2()
-                self.state = 46
+                self.state = 50
                 self.match(LOVEParser.MULT)
-                self.state = 47
+                self.state = 51
                 self.expr2()
                 pass
 
             elif la_ == 3:
                 localctx = LOVEParser.DivContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 49
+                self.state = 53
                 self.expr2()
-                self.state = 50
+                self.state = 54
                 self.match(LOVEParser.DIV)
-                self.state = 51
+                self.state = 55
                 self.expr2()
                 pass
 
@@ -699,42 +735,42 @@ class LOVEParser ( Parser ):
         localctx = LOVEParser.Expr2Context(self, self._ctx, self.state)
         self.enterRule(localctx, 8, self.RULE_expr2)
         try:
-            self.state = 63
+            self.state = 67
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [11]:
+            if token in [13]:
                 localctx = LOVEParser.IntContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 55
+                self.state = 59
                 self.match(LOVEParser.INT)
                 pass
-            elif token in [10]:
+            elif token in [12]:
                 localctx = LOVEParser.RealContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 56
+                self.state = 60
                 self.match(LOVEParser.REAL)
                 pass
-            elif token in [9]:
+            elif token in [11]:
                 localctx = LOVEParser.IdContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 57
+                self.state = 61
                 self.match(LOVEParser.ID)
                 pass
-            elif token in [16]:
+            elif token in [18]:
                 localctx = LOVEParser.StringContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 58
+                self.state = 62
                 self.match(LOVEParser.STRING)
                 pass
-            elif token in [2]:
+            elif token in [4]:
                 localctx = LOVEParser.ParContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 59
-                self.match(LOVEParser.T__1)
-                self.state = 60
+                self.state = 63
+                self.match(LOVEParser.T__3)
+                self.state = 64
                 self.expr0()
-                self.state = 61
-                self.match(LOVEParser.T__2)
+                self.state = 65
+                self.match(LOVEParser.T__4)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -795,30 +831,30 @@ class LOVEParser ( Parser ):
         try:
             localctx = LOVEParser.ArrContext(self, localctx)
             self.enterOuterAlt(localctx, 1)
-            self.state = 65
-            self.match(LOVEParser.T__3)
-            self.state = 74
+            self.state = 69
+            self.match(LOVEParser.T__5)
+            self.state = 78
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==11:
-                self.state = 66
+            if _la==13:
+                self.state = 70
                 self.match(LOVEParser.INT)
-                self.state = 71
+                self.state = 75
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==5:
-                    self.state = 67
-                    self.match(LOVEParser.T__4)
-                    self.state = 68
+                while _la==7:
+                    self.state = 71
+                    self.match(LOVEParser.T__6)
+                    self.state = 72
                     self.match(LOVEParser.INT)
-                    self.state = 73
+                    self.state = 77
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
 
 
-            self.state = 76
-            self.match(LOVEParser.T__5)
+            self.state = 80
+            self.match(LOVEParser.T__7)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)

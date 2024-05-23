@@ -12,11 +12,12 @@ class Type(Enum):
     UNKNOWN = auto()
 
 class Value:
-    def __init__(self, name, type, length, var=""):
+    def __init__(self, name, type, length, var="", elements=[]):
        self.name = name
        self.var = var
        self.type = type
        self.length = length
+       self.elements = elements
        
     def __str__(self) -> str:
         return f"{self.name} {self.type} {self.length}"
@@ -97,6 +98,23 @@ class ListenerInterp(LOVEListener):
         self.stack.append(Value(n, Type.STRING, len(content)))
 
 
+    def exitArrayAccess(self, ctx: LOVEParser.ArrayAccessContext):
+        ID = ctx.ID().getText()
+        index = int(ctx.INT().getText())
+
+        # Check if the array exists and is of type ARRAY
+        if ID in self.variables and self.variables[ID] == Type.ARRAY:
+            array_value = self.stack.pop()
+            element = array_value.elements[index]
+
+            # Print the accessed element
+            if isinstance(element, int):
+                self.print_int_element(element)
+        else:
+            print(f"Error: Array '{ID}' is not defined or not of type ARRAY")
+
+
+
     def exitId(self, ctx: LOVEParser.IdContext):
         if ctx.ID() is not None:
             ID = ctx.ID().getText()
@@ -116,12 +134,12 @@ class ListenerInterp(LOVEListener):
         
         if type == Type.INT:
             self.printf_i32(ID)
-            
         if type == Type.REAL:
             self.printf_double(ID)
-        
         if type == Type.STRING:
             self.printf_string(ID)
+        elif type == Type.ARRAY:
+            self.show_array(ID)
             
         
     def exitGet(self, ctx: LOVEParser.GetContext):
@@ -138,7 +156,6 @@ class ListenerInterp(LOVEListener):
         v1:Value = self.stack.pop()
 
         if v1.type == Type.ID:
-            
             if self.variables[v1.var] == Type.INT:
                 self.add_int(v1, v2)
                 self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
@@ -197,6 +214,21 @@ class ListenerInterp(LOVEListener):
     def exitDiv(self, ctx: LOVEParser.SubstrContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
+        if v1.type == Type.ID or v2.type == Type.ID:
+            if v1.type == Type.ID :
+                if self.variables[v1.var] == Type.INT:
+                    self.div_i32(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+                else: 
+                    self.div_double(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+            elif v2.type == Type.ID:
+                if self.variables[v2.var] == Type.INT:
+                    self.div_i32(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+                else: 
+                    self.div_double(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
         
         if v1.type == Type.INT: 
             self.div_i32(v1, v2)
@@ -206,11 +238,30 @@ class ListenerInterp(LOVEListener):
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
 
     def exitAssignArray(self, ctx: LOVEParser.AssignArrayContext):
-        print(self.stack.pop())
+        ID = ctx.ID().getText()
+        v = self.stack.pop()
+        array_values = v.name[1:-1].split(",")
+        elements = [int(v.strip()) for v in array_values]
+        array_length = len(elements)
+        array_value = Value(ID, Type.ARRAY, array_length, elements=elements)
+        
+        self.variables[ID] = Type.ARRAY
+        self.stack.append(array_value)
+        self.declare_int_array(ID, array_length)
+        
+        for i, element in enumerate(elements):
+            self.assign_int_array_element(ID, i, element)
         
     def exitArr(self, ctx: LOVEParser.ArrContext):
         self.stack.append(Value(ctx.getText(), Type.ARRAY, 0))
 
+    def declare_int_array(self, id, length):
+        self.text += f"%{id} = alloca [{length} x i32]\n"
+
+    def assign_int_array_element(self, id, index, value):
+        self.text += f"%{self.reg} = getelementptr inbounds [{index+1} x i32], [{index+1} x i32]* %{id}, i32 0, i32 {index}\n"
+        self.reg += 1
+        self.text += f"store i32 {value}, i32* %{self.reg-1}\n"
                 
     def declare_int(self,id):
         self.text += f"%{id} = alloca i32\n"
@@ -338,6 +389,70 @@ class ListenerInterp(LOVEListener):
     def load_string(self, id):
         self.text += f"%{self.reg} = load i8*, i8** %{id}\n"
         self.reg += 1
+        
+    def show_array(self, id):
+        array_length = self.stack[-1].length
+
+        # Allocate memory for loop index
+        self.text += f"%i = alloca i32\n"
+        self.text += f"store i32 0, i32* %i\n"
+
+        # Loop start
+        loop_label = self.reg
+        self.reg += 1
+        self.text += f"br label %loop{loop_label}\n"
+        self.text += f"loop{loop_label}:\n"
+
+        # Load loop index
+        self.text += f"%{self.reg} = load i32, i32* %i\n"
+        loop_index = self.reg
+        self.reg += 1
+
+        # Check if loop index < array length
+        self.text += f"%{self.reg} = icmp slt i32 %{loop_index}, {array_length}\n"
+        self.reg += 1
+        self.text += f"br i1 %{self.reg-1}, label %loop_body{loop_label}, label %loop_end{loop_label}\n"
+
+        # Loop body
+        self.text += f"loop_body{loop_label}:\n"
+        self.text += f"%{self.reg} = getelementptr inbounds [{array_length} x i32], [{array_length} x i32]* %{id}, i32 0, i32 %{loop_index}\n"
+        self.reg += 1
+        self.text += f"%{self.reg} = load i32, i32* %{self.reg-1}\n"
+        self.reg += 1
+        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
+        self.reg += 1
+
+        # Increment loop index
+        self.text += f"%{self.reg} = add i32 %{loop_index}, 1\n"
+        self.reg += 1
+        self.text += f"store i32 %{self.reg-1}, i32* %i\n"
+
+        # Jump back to loop start
+        self.text += f"br label %loop{loop_label}\n"
+
+        # Loop end
+        self.text += f"loop_end{loop_label}:\n"
+        
+        
+    def print_specific_int_array_element(self, id, index):
+        # Load the element at the specified index
+        self.text += f"%{self.reg} = getelementptr inbounds [{index+1} x i32], [{index+1} x i32]* %{id}, i32 0, i32 {index}\n"
+        self.reg += 1
+        element_ptr = f"%{self.reg-1}"
+
+        # Load the value of the element
+        self.text += f"%{self.reg} = load i32, i32* {element_ptr}\n"
+        self.reg += 1
+
+        # Print the value of the element
+        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
+        self.reg += 1
+        
+    def print_int_element(self, value):
+        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 {value})\n"
+        self.reg += 1
+
+
         
     def generate(self):
         output = ""
