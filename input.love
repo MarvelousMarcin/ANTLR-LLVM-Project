@@ -1,0 +1,6 @@
+a LOVE 12 + 13 * 20 - 30
+b LOVE 99
+
+z LOVE a+b
+
+show z
