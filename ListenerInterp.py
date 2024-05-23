@@ -57,15 +57,29 @@ class ListenerInterp(LOVEListener):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
 
-        if(v1.type == v2.type):
-            if v1.type == Type.INT: 
-                self.mul_i32(v1, v2)
-                self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
-            if v1.type == Type.REAL:
-                self.mul_double(v1, v2)
-                self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
-        else:
-            raise TypeError("Mismatch types")
+        if v1.type == Type.ID or v2.type == Type.ID:
+
+            if v1.type == Type.ID :
+                if self.variables[v1.var] == Type.INT:
+                    self.mul_i32(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+                else: 
+                    self.mul_double(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+            if v2.type == Type.ID:
+                if self.variables[v2.var] == Type.INT:
+                    self.mul_i32(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+                else: 
+                    self.mul_double(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+
+        if v1.type == Type.INT: 
+            self.mul_i32(v1, v2)
+            self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
+        if v1.type == Type.REAL:
+            self.mul_double(v1, v2)
+            self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
         
     def exitInt(self, ctx: LOVEParser.IntContext):
         self.stack.append(Value(ctx.INT().getText(), Type.INT, 0))
@@ -153,11 +167,30 @@ class ListenerInterp(LOVEListener):
     def exitSubstr(self, ctx: LOVEParser.SubstrContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
+
+        if v1.type == Type.ID or v2.type == Type.ID:
+            if v1.type == Type.ID and v2.type == Type.ID:
+                self.sub_i32(v1, v2)
+                self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+            elif v1.type == Type.ID :
+                if self.variables[v1.var] == Type.INT:
+                    self.sub_i32(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+                else: 
+                    self.sub_double(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+            elif v2.type == Type.ID:
+                if self.variables[v2.var] == Type.INT:
+                    self.sub_i32(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
+                else: 
+                    self.sub_double(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
         
-        if v1.type == Type.INT: 
+        elif v1.type == Type.INT: 
             self.sub_i32(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
-        if v1.type == Type.REAL or v1.type == Type.ID:
+        elif v1.type == Type.REAL or v1.type == Type.ID:
             self.sub_double(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
 

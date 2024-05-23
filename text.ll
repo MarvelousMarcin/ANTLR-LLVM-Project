@@ -9,23 +9,19 @@ declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noa
 @strps = constant [4 x i8] c"%s\0A\00"
 @strs = constant [3 x i8] c"%d\00"
 define i32 @main() nounwind{
-%h = alloca i32
-%1 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strs, i32 0, i32 0), i32* %h)
 %a = alloca i32
 store i32 5, i32* %a
 %b = alloca i32
-store i32 8, i32* %b
+store i32 5, i32* %b
 %y = alloca i32
 store i32 13, i32* %y
-%2 = load i32, i32* %a
-%3 = load i32, i32* %b
-%4 = load i32, i32* %y
-%5 = add i32 4, %4
-%6 = add i32 %3, %5
-%7 = add i32 %2, %6
+%1 = load i32, i32* %a
+%2 = load i32, i32* %b
+%3 = mul i32 %1, %2
+%4 = mul i32 %1, %2
 %z = alloca i32
-store i32 %7, i32* %z
-%8 = load i32, i32* %z
-%9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %8)
+store i32 %4, i32* %z
+%5 = load i32, i32* %z
+%6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %5)
 ret i32 0 }
 
