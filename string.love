@@ -1,0 +1,6 @@
+gets b
+show b
+
+a LOVE "ala ma kota " + " fajnego"
+
+show a

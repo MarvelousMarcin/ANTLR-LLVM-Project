@@ -5,6 +5,7 @@ prog: ( stat? NEWLINE )*
 
 stat: SHOW ID               #show
     | GET ID                #get
+    | GETS  ID              #gets
  	| ID 'LOVE' expr0	    #assign
     | ID 'LOVE' array       #assignArray
     | ID '[' INT ']'        #arrayAccess
@@ -35,6 +36,9 @@ GET:    'get'
    ;
 
 SHOW:   'show'
+   ;
+
+GETS:   'gets'
    ;
    
 ID:   ('a'..'z'|'A'..'Z')+

@@ -131,16 +131,20 @@ class ListenerInterp(LOVEListener):
     def exitShow(self, ctx: LOVEParser.ShowContext):
         ID = ctx.ID().getText()
         type = self.variables.get(ID)
-        
+
         if type == Type.INT:
             self.printf_i32(ID)
-        if type == Type.REAL:
+        elif type == Type.REAL:
             self.printf_double(ID)
-        if type == Type.STRING:
+        elif type == Type.STRING:
             self.printf_string(ID)
         elif type == Type.ARRAY:
             self.show_array(ID)
-            
+      
+    def exitGets(self, ctx: LOVEParser.GetsContext):
+        ID = ctx.ID().getText()
+        self.variables[ID] = Type.STRING
+        self.scanf_string(ID, 16)     
         
     def exitGet(self, ctx: LOVEParser.GetContext):
         ID = ctx.ID().getText()
@@ -154,7 +158,7 @@ class ListenerInterp(LOVEListener):
     def exitAdd(self, ctx: LOVEParser.AddContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
-
+        
         if v1.type == Type.ID:
             if self.variables[v1.var] == Type.INT:
                 self.add_int(v1, v2)
@@ -452,6 +456,16 @@ class ListenerInterp(LOVEListener):
         self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 {value})\n"
         self.reg += 1
 
+    def scanf_string(self, id:str, l:int):
+        self.allocate_string(f"str{self.strr}", l)
+        self.text += f"%{id} = alloca i8*\n"
+        self.text  += f"%{self.reg} = getelementptr inbounds [{l+1} x i8], [{l+1} x i8]* %str{self.strr}, i64 0, i64 0\n"
+        self.reg += 1
+        self.text  += f"store i8* %{self.reg-1} , i8** %{id} \n"; 
+        self.strr += 1
+        self.text  += f"%{self.reg}  = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strs2, i32 0, i32 0), i8* %{self.reg-1} )\n"
+        self.reg += 1
+   
 
         
     def generate(self):
@@ -465,6 +479,7 @@ class ListenerInterp(LOVEListener):
         output += "@strpi = constant [4 x i8] c\"%d\\0A\\00\"\n"
         output += "@strpd = constant [4 x i8] c\"%f\\0A\\00\"\n"
         output += "@strps = constant [4 x i8] c\"%s\\0A\\00\"\n"
+        output += "@strs2 = constant [5 x i8] c\"%10s\\00\"\n"
         output += "@strs = constant [3 x i8] c\"%d\\00\"\n"
         output += self.header_text
         output += "define i32 @main() nounwind{\n"

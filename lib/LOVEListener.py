@@ -35,6 +35,15 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#gets.
+    def enterGets(self, ctx:LOVEParser.GetsContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#gets.
+    def exitGets(self, ctx:LOVEParser.GetsContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#assign.
     def enterAssign(self, ctx:LOVEParser.AssignContext):
         pass
