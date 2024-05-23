@@ -1,6 +1,8 @@
-a LOVE 12 + 13 * 20 - 30
-b LOVE 99
+get h
+a LOVE 5
+b LOVE 8
+y LOVE 13
 
-z LOVE a+b
+z LOVE a + b + 4 + y
 
 show z

@@ -123,7 +123,7 @@ class ListenerInterp(LOVEListener):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
 
-        if v1.type == Type.ID and v2.type == Type.ID:
+        if v1.type == Type.ID:
             
             if self.variables[v1.var] == Type.INT:
                 self.add_int(v1, v2)
@@ -305,8 +305,6 @@ class ListenerInterp(LOVEListener):
     def load_string(self, id):
         self.text += f"%{self.reg} = load i8*, i8** %{id}\n"
         self.reg += 1
-        
-
         
     def generate(self):
         output = ""
