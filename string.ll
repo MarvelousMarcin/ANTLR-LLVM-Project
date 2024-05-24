@@ -11,6 +11,7 @@ declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noa
 @strs = constant [3 x i8] c"%d\00"
 @str2 = constant [13 x i8] c"ala ma kota \00"
 @str3 = constant [9 x i8] c" fajnego\00"
+@str5 = constant [21 x i8] c"jest to text testowy\00"
 define i32 @main() nounwind{
 %str1 = alloca [510 x i8]
 %b = alloca i8*
@@ -43,6 +44,24 @@ store i8* %9, i8** %ptrstr4
 %a = alloca i8*
 store i8* %14, i8** %a
 %15 = load i8*, i8** %a
-%16 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strps, i32 0, i32 0), i8* %15)
+%str5 = alloca [630 x i8]
+%16 = bitcast [21 x i8]* %str5 to i8*
+call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %16, i8* align 1 getelementptr inbounds ([21 x i8], [21 x i8]* @str5, i32 0, i32 0), i64 21, i1 false)
+%ptrstr5 = alloca i8*
+%17 = getelementptr inbounds [21 x i8], [21 x i8]* %str5, i64 0, i64 0
+store i8* %17, i8** %ptrstr5
+%str6 = alloca [630 x i8]
+%ptrstr6 = alloca i8*
+%18 = getelementptr inbounds [21 x i8], [21 x i8]* %str6, i64 0, i64 0
+store i8* %18, i8** %ptrstr6
+%19 = load i8*, i8** %ptrstr6
+%20 = load i8*, i8** %ptrstr4
+%21 = call i8* @strcpy(i8* %19, i8* %20)
+%22 = load i8*, i8** %ptrstr5
+%23 = call i8* @strcat(i8* %19, i8* %22)
+%h = alloca i8*
+store i8* %23, i8** %h
+%24 = load i8*, i8** %h
+%25 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strps, i32 0, i32 0), i8* %24)
 ret i32 0 }
 

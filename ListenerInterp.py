@@ -43,16 +43,22 @@ class ListenerInterp(LOVEListener):
     def exitAssign(self, ctx: LOVEParser.AssignContext):
         ID = ctx.ID().getText()
         v:Value = self.stack.pop()
-        self.variables[ID] = v.type
+               
         if v.type == Type.INT:
-            self.declare_int(ID)
+            if ID not in self.variables:
+                self.declare_int(ID)
             self.assign_int(ID, v.name)
         if v.type == Type.REAL:
-            self.declare_double(ID)
+            if ID not in self.variables:
+                self.declare_double(ID)
             self.assign_double(ID, v.name)
         if v.type == Type.STRING:
-            self.declare_string(ID)
+            if ID not in self.variables:
+                self.declare_string(ID)
             self.assign_string(ID)
+            
+        self.variables[ID] = v.type
+
  
     def exitMult(self, ctx: LOVEParser.MultContext):
         v2:Value = self.stack.pop()
@@ -102,12 +108,10 @@ class ListenerInterp(LOVEListener):
         ID = ctx.ID().getText()
         index = int(ctx.INT().getText())
 
-        # Check if the array exists and is of type ARRAY
         if ID in self.variables and self.variables[ID] == Type.ARRAY:
             array_value = self.stack.pop()
             element = array_value.elements[index]
 
-            # Print the accessed element
             if isinstance(element, int):
                 self.print_int_element(element)
         else:
