@@ -1,7 +1,10 @@
 grammar LOVE;
 
-prog: ( (stat|function)? NEWLINE )* 
+prog: block
     ;
+
+block: ( (stat|function)? NEWLINE )* 
+;
 
 function: FUNCTION fparam fblock ENDFUNCTION
 ;
@@ -12,7 +15,15 @@ stat: SHOW ID               #show
  	| ID 'LOVE' expr0	    #assign
     | ID 'LOVE' array       #assignArray
     | ID '[' INT ']'        #arrayAccess
+    | REPEAT repetitions stat ENDREPEAT		#repeat
+    | IF equal THEN blockif ENDIF 	#if
    ;
+
+blockif: block
+;
+
+equal: ID '==' INT
+;
 
 expr0:  expr1			    #single0
       | expr1 ADD expr0	    #add 
@@ -31,11 +42,17 @@ expr2:   INT			    #int
        | '(' expr0 ')'		#par
 ;
 
+repetitions: expr2
+;
+
+
 array: '{' (INT (',' INT)*)? '}' #arr
     ;
 
 fblock: ( stat? NEWLINE )* 
 ; 
+
+
 
 fparam: ID
 ;
@@ -44,6 +61,21 @@ FUNCTION: 'function'
 ;
 
 ENDFUNCTION:	'endfunction'
+;
+
+REPEAT: 'repeat'
+;
+
+IF:	'if'
+;
+
+THEN:	'then'
+;
+
+ENDIF:	'endif'
+;
+
+ENDREPEAT: 'endrepeat'
 ;
 
 GET:    'get'

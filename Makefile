@@ -33,6 +33,12 @@ function:
 	lli function.ll
 
 
+
+if:
+	python Driver.py if.love > if.ll
+	lli if.ll
+
+
 clean:
 	rm -f *.ll
 	rm -f *.class

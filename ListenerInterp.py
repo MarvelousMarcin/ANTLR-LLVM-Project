@@ -32,6 +32,8 @@ class ListenerInterp(LOVEListener):
     reg = 1
     strr = 1
     main_tmp = 1
+    br = 0
+    brstack = []
     
     variables:dict[str, Type] = {}
     localnames: dict[str, Type] = {}
@@ -68,7 +70,6 @@ class ListenerInterp(LOVEListener):
     def exitAssign(self, ctx: LOVEParser.AssignContext):
         ID = ctx.ID().getText()
         v:Value = self.stack.pop()
-
         if v.type == Type.INT:
             self.assign_int(self.set_variable(ID), v.name)
         elif v.type == Type.REAL:
@@ -138,7 +139,7 @@ class ListenerInterp(LOVEListener):
         if self.function not in self.localnames:
             self.assign_int(self.set_variable(self.function), 0)
         
-        self.load_i32(self.function)
+        self.load_i32(f"%{self.function}")
         self.functionend()
         self.localnames = {}
         self.glob = True
@@ -233,7 +234,17 @@ class ListenerInterp(LOVEListener):
         if v1.type == Type.REAL:
             self.add_double(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
-            
+       
+    def enterBlockif(self, ctx: LOVEParser.BlockifContext):
+        self.ifstart()
+        
+    def exitBlockif(self, ctx: LOVEParser.BlockifContext):
+        self.ifend()
+        
+    def exitEqual(self, ctx: LOVEParser.EqualContext):
+        ID = ctx.ID().getText()
+        INT = ctx.INT().getText()
+        self.icmp(ID, INT)
     
     def exitSubstr(self, ctx: LOVEParser.SubstrContext):
         v2:Value = self.stack.pop()
@@ -542,6 +553,24 @@ class ListenerInterp(LOVEListener):
     
     def close_main(self):
         self.text += self.buffer    
+        
+    def ifstart(self):
+        self.br += 1
+        self.buffer += f"br i1 %{self.reg - 1}, label %true{self.br}, label %false{self.br}\n"
+        self.buffer += f"true{self.br}:\n"
+        self.brstack.append(self.br)
+   
+    def ifend(self):
+        b = self.brstack.pop()
+        self.buffer += f"br label %false{b}\n"
+        self.buffer += f"false{b}:\n"
+   
+    def icmp(self, id:str, value: str):
+        self.buffer += f"%{self.reg} = load i32, i32* @{id}\n"
+        self.reg += 1
+        self.buffer += f"%{self.reg} = icmp eq i32 %{self.reg-1}, {value}\n"
+        self.reg += 1
+   
         
     def generate(self):
         output = ""

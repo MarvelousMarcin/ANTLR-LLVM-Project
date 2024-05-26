@@ -1,0 +1,17 @@
+
+function fun
+  x LOVE 1
+  fun LOVE x
+endfunction
+
+z LOVE fun
+
+if z == 1 then
+  z LOVE 7
+  show z
+
+  if z == 7 then
+    h LOVE z + 3
+    show h
+  endif
+endif

@@ -17,6 +17,15 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#block.
+    def enterBlock(self, ctx:LOVEParser.BlockContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#block.
+    def exitBlock(self, ctx:LOVEParser.BlockContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#function.
     def enterFunction(self, ctx:LOVEParser.FunctionContext):
         pass
@@ -77,6 +86,42 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#arrayAccess.
     def exitArrayAccess(self, ctx:LOVEParser.ArrayAccessContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#repeat.
+    def enterRepeat(self, ctx:LOVEParser.RepeatContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#repeat.
+    def exitRepeat(self, ctx:LOVEParser.RepeatContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#if.
+    def enterIf(self, ctx:LOVEParser.IfContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#if.
+    def exitIf(self, ctx:LOVEParser.IfContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#blockif.
+    def enterBlockif(self, ctx:LOVEParser.BlockifContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#blockif.
+    def exitBlockif(self, ctx:LOVEParser.BlockifContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#equal.
+    def enterEqual(self, ctx:LOVEParser.EqualContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#equal.
+    def exitEqual(self, ctx:LOVEParser.EqualContext):
         pass
 
 
@@ -176,6 +221,15 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#par.
     def exitPar(self, ctx:LOVEParser.ParContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#repetitions.
+    def enterRepetitions(self, ctx:LOVEParser.RepetitionsContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#repetitions.
+    def exitRepetitions(self, ctx:LOVEParser.RepetitionsContext):
         pass
 
 
