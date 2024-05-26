@@ -1,15 +1,9 @@
 get f
 
-a LOVE 1
-b LOVE 2
-z LOVE 3
-                            
-answer LOVE a * (f + z) - (b + 1000)
+a LOVE 2
+b LOVE 4
 
-h LOVE z * z + z
+z LOVE (a - b) + 100
 
-g LOVE 2 * (2 + 2)
-
-div LOVE 100/33
-
-show div
+show z
+show f

@@ -1,0 +1,5 @@
+- pętla
+- if
+- funkcja
+- zmienne globalne, lokalne
+- OR, AND itd.

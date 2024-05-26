@@ -1,0 +1,10 @@
+function fun
+  x LOVE 3
+  x LOVE 9
+  fun LOVE x
+endfunction
+
+x LOVE 13
+ala LOVE fun
+show x
+show ala

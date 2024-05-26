@@ -1,0 +1,6 @@
+a LOVE 2.0
+b LOVE 3
+
+z LOVE a + b
+
+show z

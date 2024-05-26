@@ -23,6 +23,15 @@ array:
 	python Driver.py array.love > array.ll
 	lli array.ll
 
+error:
+	python Driver.py error.love > error.ll
+	lli error.ll
+
+
+function:
+	python Driver.py function.love > function.ll
+	lli function.ll
+
 
 clean:
 	rm -f *.ll

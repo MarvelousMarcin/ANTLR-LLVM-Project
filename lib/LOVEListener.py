@@ -17,6 +17,15 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#function.
+    def enterFunction(self, ctx:LOVEParser.FunctionContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#function.
+    def exitFunction(self, ctx:LOVEParser.FunctionContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#show.
     def enterShow(self, ctx:LOVEParser.ShowContext):
         pass
@@ -176,6 +185,24 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#arr.
     def exitArr(self, ctx:LOVEParser.ArrContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#fblock.
+    def enterFblock(self, ctx:LOVEParser.FblockContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#fblock.
+    def exitFblock(self, ctx:LOVEParser.FblockContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#fparam.
+    def enterFparam(self, ctx:LOVEParser.FparamContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#fparam.
+    def exitFparam(self, ctx:LOVEParser.FparamContext):
         pass
 
 

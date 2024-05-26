@@ -1,7 +1,10 @@
 grammar LOVE;
 
-prog: ( stat? NEWLINE )* 
+prog: ( (stat|function)? NEWLINE )* 
     ;
+
+function: FUNCTION fparam fblock ENDFUNCTION
+;
 
 stat: SHOW ID               #show
     | GET ID                #get
@@ -31,6 +34,17 @@ expr2:   INT			    #int
 array: '{' (INT (',' INT)*)? '}' #arr
     ;
 
+fblock: ( stat? NEWLINE )* 
+; 
+
+fparam: ID
+;
+
+FUNCTION: 'function'
+;
+
+ENDFUNCTION:	'endfunction'
+;
 
 GET:    'get'
    ;

@@ -3,6 +3,6 @@ show b
 
 a LOVE "ala ma kota " + " fajnego"
 
-h LOVE a + "jest to text testowy"
+h LOVE a + " jest to text testowy"
 
 show h

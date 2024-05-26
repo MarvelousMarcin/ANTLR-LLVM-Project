@@ -9,6 +9,7 @@ class Type(Enum):
     REAL = auto()
     ARRAY = auto()
     STRING = auto()
+    FUNCTION = auto()
     UNKNOWN = auto()
 
 class Value:
@@ -30,42 +31,60 @@ class ListenerInterp(LOVEListener):
     header_text =""
     reg = 1
     strr = 1
+    main_tmp = 1
     
     variables:dict[str, Type] = {}
+    localnames: dict[str, Type] = {}
     stack:list[Value] = []
+    function:str = ""
+    functions = {}
+    buffer = ""
+    glob = True
     
     def __init__(self):
         self.result = {}
 
+    def enterProg(self, ctx: LOVEParser.ProgContext):
+        self.glob = True
+
     def exitProg(self, ctx: LOVEParser.ProgContext):
+        self.close_main()
         self.generate()
+        
+    def set_variable(self, ID: str):
+        id = ""
+        if self.glob :
+            if ID not in self.variables:
+                self.variables[ID] = Type.INT
+                self.declare_int(ID, True)
+            id = f"@{ID}"
+        elif not self.glob:
+            if ID not in self.localnames:
+                self.localnames[ID] = Type.INT
+                self.declare_int(ID, False)
+            id = f"%{ID}" 
+        return id
         
     def exitAssign(self, ctx: LOVEParser.AssignContext):
         ID = ctx.ID().getText()
         v:Value = self.stack.pop()
-               
+
         if v.type == Type.INT:
-            if ID not in self.variables:
-                self.declare_int(ID)
-            self.assign_int(ID, v.name)
-        if v.type == Type.REAL:
+            self.assign_int(self.set_variable(ID), v.name)
+        elif v.type == Type.REAL:
             if ID not in self.variables:
                 self.declare_double(ID)
             self.assign_double(ID, v.name)
-        if v.type == Type.STRING:
+        elif v.type == Type.STRING:
             if ID not in self.variables:
                 self.declare_string(ID)
             self.assign_string(ID)
-            
-        self.variables[ID] = v.type
-
  
     def exitMult(self, ctx: LOVEParser.MultContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
 
         if v1.type == Type.ID or v2.type == Type.ID:
-
             if v1.type == Type.ID :
                 if self.variables[v1.var] == Type.INT:
                     self.mul_i32(v1, v2)
@@ -80,6 +99,9 @@ class ListenerInterp(LOVEListener):
                 else: 
                     self.mul_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+
+        if v1.type != v2.type:
+            raise TypeError(f"Different type multiplication")
 
         if v1.type == Type.INT: 
             self.mul_i32(v1, v2)
@@ -103,6 +125,23 @@ class ListenerInterp(LOVEListener):
         n = f"ptrstr{self.strr-1}"
         self.stack.append(Value(n, Type.STRING, len(content)))
 
+    def exitFparam(self, ctx: LOVEParser.FparamContext):
+        ID = ctx.ID().getText()
+        self.functions[ID] = ID
+        self.function = ID
+        self.functionstart(ID)
+
+    def enterFblock(self, ctx: LOVEParser.FblockContext):
+        self.glob = False
+
+    def exitFblock(self, ctx: LOVEParser.FblockContext):
+        if self.function not in self.localnames:
+            self.assign_int(self.set_variable(self.function), 0)
+        
+        self.load_i32(self.function)
+        self.functionend()
+        self.localnames = {}
+        self.glob = True
 
     def exitArrayAccess(self, ctx: LOVEParser.ArrayAccessContext):
         ID = ctx.ID().getText()
@@ -123,11 +162,20 @@ class ListenerInterp(LOVEListener):
         if ctx.ID() is not None:
             ID = ctx.ID().getText()
             
+            if ID in self.functions:
+                self.call(ID)
+                self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0, ID))
+
+            if ID in self.localnames:
+                if self.localnames[ID] == Type.INT:
+                    self.load_i32(f"%{ID}")
+                self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0, ID))
+                
             if ID in self.variables:
                 if self.variables[ID] == Type.STRING:
                     self.load_string(ID)
                 if self.variables[ID] == Type.INT:
-                    self.load_i32(ID)
+                    self.load_i32(f"@{ID}")
                 if self.variables[ID] == Type.REAL:
                     self.load_double(ID)
                 self.stack.append(Value(f"%{self.reg-1}", Type.ID, 0, ID))
@@ -137,13 +185,16 @@ class ListenerInterp(LOVEListener):
         type = self.variables.get(ID)
 
         if type == Type.INT:
-            self.printf_i32(ID)
+            self.printf_i32(f"@{ID}")
         elif type == Type.REAL:
             self.printf_double(ID)
         elif type == Type.STRING:
             self.printf_string(ID)
         elif type == Type.ARRAY:
             self.show_array(ID)
+        else:
+            raise TypeError(f"No variable {ID} exists")
+
       
     def exitGets(self, ctx: LOVEParser.GetsContext):
         ID = ctx.ID().getText()
@@ -152,18 +203,14 @@ class ListenerInterp(LOVEListener):
         
     def exitGet(self, ctx: LOVEParser.GetContext):
         ID = ctx.ID().getText()
-        
-        if ID not in self.variables:
-            self.declare_int(ID)
-            self.variables[ID] = Type.INT
-            
-        self.scanf(ID)
+        self.scanf(self.set_variable(ID))
         
     def exitAdd(self, ctx: LOVEParser.AddContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
         
         if v1.type == Type.ID:
+            
             if self.variables[v1.var] == Type.INT:
                 self.add_int(v1, v2)
                 self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
@@ -178,7 +225,6 @@ class ListenerInterp(LOVEListener):
         if v1.type == Type.STRING and v2.type == Type.STRING:
             self.add_string(v1.name, v1.length, v2.name, v2.length)
             self.stack.append(Value(f"%{self.reg-3}", Type.STRING, 0))
-
         
         if v1.type == Type.INT: 
             self.add_int(v1, v2)
@@ -192,12 +238,13 @@ class ListenerInterp(LOVEListener):
     def exitSubstr(self, ctx: LOVEParser.SubstrContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
-
+        
         if v1.type == Type.ID or v2.type == Type.ID:
+            
             if v1.type == Type.ID and v2.type == Type.ID:
                 self.sub_i32(v1, v2)
                 self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
-            elif v1.type == Type.ID :
+            elif v1.type == Type.ID:
                 if self.variables[v1.var] == Type.INT:
                     self.sub_i32(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
@@ -211,10 +258,13 @@ class ListenerInterp(LOVEListener):
                 else: 
                     self.sub_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
-        
+                    
+        elif v1.type != v2.type:
+            raise TypeError(f"Different type substraction")    
         elif v1.type == Type.INT: 
             self.sub_i32(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
+            print("ENTER")
         elif v1.type == Type.REAL or v1.type == Type.ID:
             self.sub_double(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
@@ -223,6 +273,7 @@ class ListenerInterp(LOVEListener):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
         if v1.type == Type.ID or v2.type == Type.ID:
+            
             if v1.type == Type.ID :
                 if self.variables[v1.var] == Type.INT:
                     self.div_i32(v1, v2)
@@ -237,6 +288,9 @@ class ListenerInterp(LOVEListener):
                 else: 
                     self.div_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+        
+        if v1.type != v2.type:
+            raise TypeError(f"Different type division")
         
         if v1.type == Type.INT: 
             self.div_i32(v1, v2)
@@ -271,14 +325,17 @@ class ListenerInterp(LOVEListener):
         self.reg += 1
         self.text += f"store i32 {value}, i32* %{self.reg-1}\n"
                 
-    def declare_int(self,id):
-        self.text += f"%{id} = alloca i32\n"
+    def declare_int(self,id, glob=False):
+        if glob:
+            self.header_text += f"@{id} = global i32 0\n"
+        else:
+            self.buffer += f"%{id} = alloca i32\n"
         
     def declare_double(self,id):
         self.text += f"%{id} = alloca double\n"
         
     def assign_int(self,id, value):
-        self.text += f"store i32 {value}, i32* %{id}\n"
+        self.buffer += f"store i32 {value}, i32* {id}\n"
   
     def assign_string(self,id, value):
         self.text += f"store i8* %{self.reg-1}, i8** %{id}\n"  
@@ -287,9 +344,9 @@ class ListenerInterp(LOVEListener):
         self.text += f"store double {value}, double* %{id}\n"
         
     def printf_i32(self,id):
-        self.text += f"%{self.reg} = load i32, i32* %{id}\n"
+        self.buffer += f"%{self.reg} = load i32, i32* {id}\n"
         self.reg += 1
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
         self.reg += 1
         
     def printf_double(self,id):
@@ -298,12 +355,8 @@ class ListenerInterp(LOVEListener):
         self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpd, i32 0, i32 0), double %{self.reg-1})\n"
         self.reg += 1
 
-    def scanf(self,id):
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strs, i32 0, i32 0), i32* %{id})\n"
-        self.reg+=1; 
-        
     def add_int(self, val1, val2):
-        self.text += f"%{self.reg} = add i32 {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = add i32 {val1.getName()}, {val2.getName()}\n"
         self.reg += 1
         
     def add_double(self, val1, val2):
@@ -311,7 +364,7 @@ class ListenerInterp(LOVEListener):
         self.reg += 1
    
     def load_i32(self, id):
-        self.text += f"%{self.reg} = load i32, i32* %{id}\n"
+        self.buffer += f"%{self.reg} = load i32, i32* {id}\n"
         self.reg += 1
         
     def load_double(self, id):
@@ -319,7 +372,7 @@ class ListenerInterp(LOVEListener):
         self.reg += 1
         
     def sub_i32(self, val1:Value, val2:Value):
-        self.text += f"%{self.reg} = sub i32 {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = sub i32 {val1.getName()}, {val2.getName()}\n"
         self.reg+=1    
      
     def sub_double(self, val1:Value, val2:Value):
@@ -331,11 +384,11 @@ class ListenerInterp(LOVEListener):
         self.reg+=1  
         
     def div_i32(self, val1:Value, val2:Value):
-        self.text += f"%{self.reg} = sdiv i32 {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = sdiv i32 {val1.getName()}, {val2.getName()}\n"
         self.reg+=1
         
     def mul_i32(self, val1:Value, val2:Value):
-        self.text += f"%{self.reg} = mul i32 {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = mul i32 {val1.getName()}, {val2.getName()}\n"
         self.reg+=1 
        
     def mul_double(self, val1:Value, val2:Value):
@@ -343,7 +396,7 @@ class ListenerInterp(LOVEListener):
         self.reg+=1    
         
     def scanf(self, id):
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strs, i32 0, i32 0), i32* %{id})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strs, i32 0, i32 0), i32* {id})\n"
         self.reg += 1
         
     def printf_string(self, id):
@@ -469,8 +522,26 @@ class ListenerInterp(LOVEListener):
         self.strr += 1
         self.text  += f"%{self.reg}  = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strs2, i32 0, i32 0), i8* %{self.reg-1} )\n"
         self.reg += 1
-   
-
+        
+    def functionstart(self, id:str):
+        self.text += self.buffer
+        self.buffer = f"define i32 @{id}() nounwind {{ \n"
+        self.main_tmp = self.reg
+        self.reg = 1
+        
+    def functionend(self):
+        self.buffer += f"ret i32 %{self.reg-1 }\n"; 
+        self.buffer += "}\n"
+        self.header_text += self.buffer
+        self.buffer = ""
+        self.reg = self.main_tmp
+        
+    def call(self, id: str):
+        self.buffer += f"%{self.reg} = call i32 @{id}()\n"
+        self.reg +=1
+    
+    def close_main(self):
+        self.text += self.buffer    
         
     def generate(self):
         output = ""
