@@ -74,6 +74,7 @@ class ListenerInterp(LOVEListener):
         
     def exitAssign(self, ctx: LOVEParser.AssignContext):
         ID = ctx.ID().getText()
+
         v:Value = self.stack.pop()
         if v.type == Type.INT:
             self.assign_int(self.set_variable(ID, Type.INT), v.name)

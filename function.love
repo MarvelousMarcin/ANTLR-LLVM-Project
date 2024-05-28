@@ -1,18 +1,30 @@
+fLOVE pow
+  x LOVE 100
+  pow LOVE x * x
+endfLOVE
+
 fLOVE fun
   x LOVE 3
   y LOVE 3 + 2
 
-  loop 3
+  loop y
     show x
   endloop
+
+  z LOVE pow
 
   if y == 5 then
     x LOVE x + 3
     show x
+    show z
   endif
 
   fun LOVE y
 endfLOVE
 
+
+x LOVE 10
+
 output LOVE fun
 show output
+show x
