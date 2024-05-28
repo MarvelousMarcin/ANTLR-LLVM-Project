@@ -32,7 +32,9 @@ function:
 	python Driver.py function.love > function.ll
 	lli function.ll
 
-
+loop:
+	python Driver.py loop.love > loop.ll
+	lli loop.ll
 
 if:
 	python Driver.py if.love > if.ll

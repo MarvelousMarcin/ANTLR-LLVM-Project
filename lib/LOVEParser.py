@@ -32,7 +32,7 @@ def serializedATN():
         0,48,71,5,20,0,0,49,50,5,20,0,0,50,51,5,1,0,0,51,71,3,12,6,0,52,
         53,5,20,0,0,53,54,5,1,0,0,54,71,3,20,10,0,55,56,5,20,0,0,56,57,5,
         2,0,0,57,58,5,22,0,0,58,71,5,3,0,0,59,60,5,12,0,0,60,61,3,18,9,0,
-        61,62,3,6,3,0,62,63,5,16,0,0,63,71,1,0,0,0,64,65,5,13,0,0,65,66,
+        61,62,3,2,1,0,62,63,5,16,0,0,63,71,1,0,0,0,64,65,5,13,0,0,65,66,
         3,10,5,0,66,67,5,14,0,0,67,68,3,8,4,0,68,69,5,15,0,0,69,71,1,0,0,
         0,70,43,1,0,0,0,70,45,1,0,0,0,70,47,1,0,0,0,70,49,1,0,0,0,70,52,
         1,0,0,0,70,55,1,0,0,0,70,59,1,0,0,0,70,64,1,0,0,0,71,7,1,0,0,0,72,
@@ -68,8 +68,8 @@ class LOVEParser ( Parser ):
     sharedContextCache = PredictionContextCache()
 
     literalNames = [ "<INVALID>", "'LOVE'", "'['", "']'", "'=='", "'('", 
-                     "')'", "'{'", "','", "'}'", "'function'", "'endfunction'", 
-                     "'repeat'", "'if'", "'then'", "'endif'", "'endrepeat'", 
+                     "')'", "'{'", "','", "'}'", "'fLOVE'", "'endfLOVE'", 
+                     "'loop'", "'if'", "'then'", "'endif'", "'endloop'", 
                      "'get'", "'show'", "'gets'", "<INVALID>", "<INVALID>", 
                      "<INVALID>", "'+'", "'/'", "'-'", "'*'" ]
 
@@ -389,8 +389,8 @@ class LOVEParser ( Parser ):
         def repetitions(self):
             return self.getTypedRuleContext(LOVEParser.RepetitionsContext,0)
 
-        def stat(self):
-            return self.getTypedRuleContext(LOVEParser.StatContext,0)
+        def block(self):
+            return self.getTypedRuleContext(LOVEParser.BlockContext,0)
 
         def ENDREPEAT(self):
             return self.getToken(LOVEParser.ENDREPEAT, 0)
@@ -592,7 +592,7 @@ class LOVEParser ( Parser ):
                 self.state = 60
                 self.repetitions()
                 self.state = 61
-                self.stat()
+                self.block()
                 self.state = 62
                 self.match(LOVEParser.ENDREPEAT)
                 pass

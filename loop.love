@@ -1,0 +1,5 @@
+a LOVE 13
+
+repeat 3
+  show a
+endrepeat

@@ -1,10 +1,18 @@
-function fun
+fLOVE fun
   x LOVE 3
-  x LOVE 9
-  fun LOVE x
-endfunction
+  y LOVE 3 + 2
 
-x LOVE 13
-ala LOVE fun
-show x
-show ala
+  loop 3
+    show x
+  endloop
+
+  if y == 5 then
+    x LOVE x + 3
+    show x
+  endif
+
+  fun LOVE y
+endfLOVE
+
+output LOVE fun
+show output

@@ -53,17 +53,22 @@ class ListenerInterp(LOVEListener):
         self.close_main()
         self.generate()
         
-    def set_variable(self, ID: str):
+    def set_variable(self, ID: str, type: Type):
         id = ""
         if self.glob :
             if ID not in self.variables:
-                self.variables[ID] = Type.INT
-                self.declare_int(ID, True)
+                if type == Type.INT:
+                    self.variables[ID] = Type.INT
+                    self.declare_int(ID, True)
+                if type == Type.REAL:
+                    self.variables[ID] = Type.REAL
+                    self.declare_double(ID, True)
             id = f"@{ID}"
         elif not self.glob:
             if ID not in self.localnames:
-                self.localnames[ID] = Type.INT
-                self.declare_int(ID, False)
+                if type == Type.INT:
+                    self.localnames[ID] = Type.INT
+                    self.declare_int(ID, False)
             id = f"%{ID}" 
         return id
         
@@ -71,11 +76,9 @@ class ListenerInterp(LOVEListener):
         ID = ctx.ID().getText()
         v:Value = self.stack.pop()
         if v.type == Type.INT:
-            self.assign_int(self.set_variable(ID), v.name)
+            self.assign_int(self.set_variable(ID, Type.INT), v.name)
         elif v.type == Type.REAL:
-            if ID not in self.variables:
-                self.declare_double(ID)
-            self.assign_double(ID, v.name)
+            self.assign_double(self.set_variable(ID, Type.REAL), v.name)
         elif v.type == Type.STRING:
             if ID not in self.variables:
                 self.declare_string(ID)
@@ -101,13 +104,13 @@ class ListenerInterp(LOVEListener):
                     self.mul_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
 
-        if v1.type != v2.type:
+        elif v1.type != v2.type:
             raise TypeError(f"Different type multiplication")
 
-        if v1.type == Type.INT: 
+        elif v1.type == Type.INT: 
             self.mul_i32(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
-        if v1.type == Type.REAL:
+        elif v1.type == Type.REAL:
             self.mul_double(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
         
@@ -137,7 +140,7 @@ class ListenerInterp(LOVEListener):
 
     def exitFblock(self, ctx: LOVEParser.FblockContext):
         if self.function not in self.localnames:
-            self.assign_int(self.set_variable(self.function), 0)
+            self.assign_int(self.set_variable(self.function, Type.INT), 0)
         
         self.load_i32(f"%{self.function}")
         self.functionend()
@@ -162,7 +165,6 @@ class ListenerInterp(LOVEListener):
     def exitId(self, ctx: LOVEParser.IdContext):
         if ctx.ID() is not None:
             ID = ctx.ID().getText()
-            
             if ID in self.functions:
                 self.call(ID)
                 self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0, ID))
@@ -174,23 +176,28 @@ class ListenerInterp(LOVEListener):
                 
             if ID in self.variables:
                 if self.variables[ID] == Type.STRING:
-                    self.load_string(ID)
+                    self.load_string(f"{ID}")
                 if self.variables[ID] == Type.INT:
                     self.load_i32(f"@{ID}")
                 if self.variables[ID] == Type.REAL:
-                    self.load_double(ID)
+                    self.load_double(f"@{ID}")
                 self.stack.append(Value(f"%{self.reg-1}", Type.ID, 0, ID))
             
     def exitShow(self, ctx: LOVEParser.ShowContext):
         ID = ctx.ID().getText()
         type = self.variables.get(ID)
+        prefix = "@"
+        
+        if not type:
+            type = self.localnames.get(ID)
+            prefix = "%"
 
         if type == Type.INT:
-            self.printf_i32(f"@{ID}")
+            self.printf_i32(f"{prefix}{ID}")
         elif type == Type.REAL:
-            self.printf_double(ID)
+            self.printf_double(f"{prefix}{ID}")
         elif type == Type.STRING:
-            self.printf_string(ID)
+            self.printf_string(f"{prefix}{ID}")
         elif type == Type.ARRAY:
             self.show_array(ID)
         else:
@@ -204,7 +211,7 @@ class ListenerInterp(LOVEListener):
         
     def exitGet(self, ctx: LOVEParser.GetContext):
         ID = ctx.ID().getText()
-        self.scanf(self.set_variable(ID))
+        self.scanf(self.set_variable(ID, Type.INT))
         
     def exitAdd(self, ctx: LOVEParser.AddContext):
         v2:Value = self.stack.pop()
@@ -223,15 +230,15 @@ class ListenerInterp(LOVEListener):
                 self.add_double(v1, v2)
                 self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
         
-        if v1.type == Type.STRING and v2.type == Type.STRING:
+        elif v1.type == Type.STRING and v2.type == Type.STRING:
             self.add_string(v1.name, v1.length, v2.name, v2.length)
             self.stack.append(Value(f"%{self.reg-3}", Type.STRING, 0))
         
-        if v1.type == Type.INT: 
+        elif v1.type == Type.INT: 
             self.add_int(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
             
-        if v1.type == Type.REAL:
+        elif v1.type == Type.REAL:
             self.add_double(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
        
@@ -244,7 +251,12 @@ class ListenerInterp(LOVEListener):
     def exitEqual(self, ctx: LOVEParser.EqualContext):
         ID = ctx.ID().getText()
         INT = ctx.INT().getText()
-        self.icmp(ID, INT)
+        prefix = ""
+        if ID in self.variables:
+            prefix = "@"
+        if ID in self.localnames:
+            prefix = "%"
+        self.icmp(f"{prefix}{ID}", INT)
     
     def exitSubstr(self, ctx: LOVEParser.SubstrContext):
         v2:Value = self.stack.pop()
@@ -283,6 +295,7 @@ class ListenerInterp(LOVEListener):
     def exitDiv(self, ctx: LOVEParser.SubstrContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
+
         if v1.type == Type.ID or v2.type == Type.ID:
             
             if v1.type == Type.ID :
@@ -300,15 +313,23 @@ class ListenerInterp(LOVEListener):
                     self.div_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
         
-        if v1.type != v2.type:
+        elif v1.type != v2.type:
             raise TypeError(f"Different type division")
         
-        if v1.type == Type.INT: 
+        elif v1.type == Type.INT: 
             self.div_i32(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
-        if v1.type == Type.REAL:
+        elif v1.type == Type.REAL:
             self.div_double(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0)) 
+
+    def exitRepetitions(self, ctx:LOVEParser.RepetitionsContext):
+        v = self.stack.pop()            
+        self.repeatstart(v.name)
+        
+    def exitBlock(self, ctx: LOVEParser.BlockContext):
+        if isinstance(ctx.parentCtx, LOVEParser.RepeatContext):
+            self.repeatend()
 
     def exitAssignArray(self, ctx: LOVEParser.AssignArrayContext):
         ID = ctx.ID().getText()
@@ -329,12 +350,12 @@ class ListenerInterp(LOVEListener):
         self.stack.append(Value(ctx.getText(), Type.ARRAY, 0))
 
     def declare_int_array(self, id, length):
-        self.text += f"%{id} = alloca [{length} x i32]\n"
+        self.buffer += f"%{id} = alloca [{length} x i32]\n"
 
     def assign_int_array_element(self, id, index, value):
-        self.text += f"%{self.reg} = getelementptr inbounds [{index+1} x i32], [{index+1} x i32]* %{id}, i32 0, i32 {index}\n"
+        self.buffer += f"%{self.reg} = getelementptr inbounds [{index+1} x i32], [{index+1} x i32]* %{id}, i32 0, i32 {index}\n"
         self.reg += 1
-        self.text += f"store i32 {value}, i32* %{self.reg-1}\n"
+        self.buffer += f"store i32 {value}, i32* %{self.reg-1}\n"
                 
     def declare_int(self,id, glob=False):
         if glob:
@@ -342,17 +363,20 @@ class ListenerInterp(LOVEListener):
         else:
             self.buffer += f"%{id} = alloca i32\n"
         
-    def declare_double(self,id):
-        self.text += f"%{id} = alloca double\n"
+    def declare_double(self,id, glob=False):
+        if glob:
+            self.header_text += f"@{id} = global double 0.0\n"
+        else:
+            self.buffer += f"%{id} = alloca double\n"
         
     def assign_int(self,id, value):
         self.buffer += f"store i32 {value}, i32* {id}\n"
   
     def assign_string(self,id, value):
-        self.text += f"store i8* %{self.reg-1}, i8** %{id}\n"  
+        self.buffer += f"store i8* %{self.reg-1}, i8** %{id}\n"  
     
     def assign_double(self,id, value):
-        self.text += f"store double {value}, double* %{id}\n"
+        self.buffer += f"store double {value}, double* {id}\n"
         
     def printf_i32(self,id):
         self.buffer += f"%{self.reg} = load i32, i32* {id}\n"
@@ -361,17 +385,21 @@ class ListenerInterp(LOVEListener):
         self.reg += 1
         
     def printf_double(self,id):
-        self.text += f"%{self.reg} = load double, double* %{id}\n"
+        self.buffer += f"%{self.reg} = load double, double* {id}\n"
         self.reg += 1
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpd, i32 0, i32 0), double %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpd, i32 0, i32 0), double %{self.reg-1})\n"
         self.reg += 1
 
     def add_int(self, val1, val2):
         self.buffer += f"%{self.reg} = add i32 {val1.getName()}, {val2.getName()}\n"
         self.reg += 1
         
+    def add_int_simple(self, val1, val2):
+        self.buffer += f"%{self.reg} = add i32 {val1}, {val2}\n"
+        self.reg += 1
+        
     def add_double(self, val1, val2):
-        self.text += f"%{self.reg} = fadd double {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = fadd double {val1.getName()}, {val2.getName()}\n"
         self.reg += 1
    
     def load_i32(self, id):
@@ -379,7 +407,7 @@ class ListenerInterp(LOVEListener):
         self.reg += 1
         
     def load_double(self, id):
-        self.text += f"%{self.reg} = load double, double* %{id}\n"
+        self.buffer += f"%{self.reg} = load double, double* {id}\n"
         self.reg += 1
         
     def sub_i32(self, val1:Value, val2:Value):
@@ -387,11 +415,11 @@ class ListenerInterp(LOVEListener):
         self.reg+=1    
      
     def sub_double(self, val1:Value, val2:Value):
-        self.text += f"%{self.reg} = fsub double {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = fsub double {val1.getName()}, {val2.getName()}\n"
         self.reg+=1  
         
     def div_double(self, val1:Value, val2:Value):
-        self.text += f"%{self.reg} = fdiv double {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = fdiv double {val1.getName()}, {val2.getName()}\n"
         self.reg+=1  
         
     def div_i32(self, val1:Value, val2:Value):
@@ -403,7 +431,7 @@ class ListenerInterp(LOVEListener):
         self.reg+=1 
        
     def mul_double(self, val1:Value, val2:Value):
-        self.text += f"%{self.reg} = fmul double {val1.getName()}, {val2.getName()}\n"
+        self.buffer += f"%{self.reg} = fmul double {val1.getName()}, {val2.getName()}\n"
         self.reg+=1    
         
     def scanf(self, id):
@@ -411,19 +439,19 @@ class ListenerInterp(LOVEListener):
         self.reg += 1
         
     def printf_string(self, id):
-        self.text += f"%{self.reg} = load i8*, i8** %{id}\n"
+        self.buffer += f"%{self.reg} = load i8*, i8** %{id}\n"
         self.reg += 1
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strps, i32 0, i32 0), i8* %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strps, i32 0, i32 0), i8* %{self.reg-1})\n"
         self.reg += 1
         
     def declare_string(self, id):
-        self.text += f"%{id} = alloca i8*\n"
+        self.buffer += f"%{id} = alloca i8*\n"
         
     def assign_string(self,id):
-        self.text += f"store i8* %{self.reg-1}, i8** %{id}\n"
+        self.buffer += f"store i8* %{self.reg-1}, i8** %{id}\n"
         
     def allocate_string(self,id, l:int):
-        self.text += f"%{id} = alloca [{(l+1)*30} x i8]\n"
+        self.buffer += f"%{id} = alloca [{(l+1)*30} x i8]\n"
 
 
     def constant_string(self,content:str):
@@ -431,111 +459,111 @@ class ListenerInterp(LOVEListener):
         self.header_text += f"@str{self.strr} = constant [{l} x i8] c\"{content}\\00\"\n"
         n = f"str{self.strr}"
         self.allocate_string(n, (l-1))
-        self.text += f"%{self.reg} = bitcast [{l} x i8]* %{n} to i8*\n"
-        self.text += f"call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %{self.reg}, i8* align 1 getelementptr inbounds ([{l} x i8], [{l} x i8]* @{n}, i32 0, i32 0), i64 {l}, i1 false)\n"
+        self.buffer += f"%{self.reg} = bitcast [{l} x i8]* %{n} to i8*\n"
+        self.buffer += f"call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %{self.reg}, i8* align 1 getelementptr inbounds ([{l} x i8], [{l} x i8]* @{n}, i32 0, i32 0), i64 {l}, i1 false)\n"
         self.reg += 1
-        self.text += f"%ptr{n} = alloca i8*\n"
-        self.text += f"%{self.reg} = getelementptr inbounds [{l} x i8], [{l} x i8]* %{n}, i64 0, i64 0\n"
+        self.buffer += f"%ptr{n} = alloca i8*\n"
+        self.buffer += f"%{self.reg} = getelementptr inbounds [{l} x i8], [{l} x i8]* %{n}, i64 0, i64 0\n"
         self.reg += 1
-        self.text += f"store i8* %{self.reg-1}, i8** %ptr{n}\n";    
+        self.buffer += f"store i8* %{self.reg-1}, i8** %ptr{n}\n";    
         self.strr += 1
         
     def add_string(self, id1, l1:int, id2, l2:int):
         self.allocate_string(f"str{self.strr}", l1+l2)
-        self.text += f"%ptrstr{self.strr} = alloca i8*\n"
-        self.text += f"%{self.reg} = getelementptr inbounds [{l1+l2+1} x i8], [{l1+l2+1} x i8]* %str{self.strr}, i64 0, i64 0\n"
+        self.buffer += f"%ptrstr{self.strr} = alloca i8*\n"
+        self.buffer += f"%{self.reg} = getelementptr inbounds [{l1+l2+1} x i8], [{l1+l2+1} x i8]* %str{self.strr}, i64 0, i64 0\n"
         self.reg +=1
-        self.text += f"store i8* %{self.reg-1}, i8** %ptrstr{self.strr}\n" 
-        self.text += f"%{self.reg} = load i8*, i8** %ptrstr{self.strr}\n"
+        self.buffer += f"store i8* %{self.reg-1}, i8** %ptrstr{self.strr}\n" 
+        self.buffer += f"%{self.reg} = load i8*, i8** %ptrstr{self.strr}\n"
         self.reg +=1  
-        self.text += f"%{self.reg} = load i8*, i8** %ptrstr{self.strr-2}\n"
+        self.buffer += f"%{self.reg} = load i8*, i8** %ptrstr{self.strr-2}\n"
         self.reg +=1
-        self.text += f"%{self.reg} = call i8* @strcpy(i8* %{self.reg-2}, i8* %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i8* @strcpy(i8* %{self.reg-2}, i8* %{self.reg-1})\n"
         self.reg +=1
-        self.text += f"%{self.reg} = load i8*, i8** %ptrstr{self.strr-1}\n"
+        self.buffer += f"%{self.reg} = load i8*, i8** %ptrstr{self.strr-1}\n"
         self.reg +=1
-        self.text += f"%{self.reg} = call i8* @strcat(i8* %{self.reg-4}, i8* %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i8* @strcat(i8* %{self.reg-4}, i8* %{self.reg-1})\n"
         self.reg +=1
         self.strr += 1 
     
     def load_string(self, id):
-        self.text += f"%{self.reg} = load i8*, i8** %{id}\n"
+        self.buffer += f"%{self.reg} = load i8*, i8** %{id}\n"
         self.reg += 1
         
     def show_array(self, id):
         array_length = self.stack[-1].length
 
         # Allocate memory for loop index
-        self.text += f"%i = alloca i32\n"
-        self.text += f"store i32 0, i32* %i\n"
+        self.buffer += f"%i = alloca i32\n"
+        self.buffer += f"store i32 0, i32* %i\n"
 
         # Loop start
         loop_label = self.reg
         self.reg += 1
-        self.text += f"br label %loop{loop_label}\n"
-        self.text += f"loop{loop_label}:\n"
+        self.buffer += f"br label %loop{loop_label}\n"
+        self.buffer += f"loop{loop_label}:\n"
 
         # Load loop index
-        self.text += f"%{self.reg} = load i32, i32* %i\n"
+        self.buffer += f"%{self.reg} = load i32, i32* %i\n"
         loop_index = self.reg
         self.reg += 1
 
         # Check if loop index < array length
-        self.text += f"%{self.reg} = icmp slt i32 %{loop_index}, {array_length}\n"
+        self.buffer += f"%{self.reg} = icmp slt i32 %{loop_index}, {array_length}\n"
         self.reg += 1
-        self.text += f"br i1 %{self.reg-1}, label %loop_body{loop_label}, label %loop_end{loop_label}\n"
+        self.buffer += f"br i1 %{self.reg-1}, label %loop_body{loop_label}, label %loop_end{loop_label}\n"
 
         # Loop body
-        self.text += f"loop_body{loop_label}:\n"
-        self.text += f"%{self.reg} = getelementptr inbounds [{array_length} x i32], [{array_length} x i32]* %{id}, i32 0, i32 %{loop_index}\n"
+        self.buffer += f"loop_body{loop_label}:\n"
+        self.buffer += f"%{self.reg} = getelementptr inbounds [{array_length} x i32], [{array_length} x i32]* %{id}, i32 0, i32 %{loop_index}\n"
         self.reg += 1
-        self.text += f"%{self.reg} = load i32, i32* %{self.reg-1}\n"
+        self.buffer += f"%{self.reg} = load i32, i32* %{self.reg-1}\n"
         self.reg += 1
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
         self.reg += 1
 
         # Increment loop index
-        self.text += f"%{self.reg} = add i32 %{loop_index}, 1\n"
+        self.buffer += f"%{self.reg} = add i32 %{loop_index}, 1\n"
         self.reg += 1
-        self.text += f"store i32 %{self.reg-1}, i32* %i\n"
+        self.buffer += f"store i32 %{self.reg-1}, i32* %i\n"
 
         # Jump back to loop start
-        self.text += f"br label %loop{loop_label}\n"
+        self.buffer += f"br label %loop{loop_label}\n"
 
         # Loop end
-        self.text += f"loop_end{loop_label}:\n"
+        self.buffer += f"loop_end{loop_label}:\n"
         
         
     def print_specific_int_array_element(self, id, index):
         # Load the element at the specified index
-        self.text += f"%{self.reg} = getelementptr inbounds [{index+1} x i32], [{index+1} x i32]* %{id}, i32 0, i32 {index}\n"
+        self.buffer += f"%{self.reg} = getelementptr inbounds [{index+1} x i32], [{index+1} x i32]* %{id}, i32 0, i32 {index}\n"
         self.reg += 1
         element_ptr = f"%{self.reg-1}"
 
         # Load the value of the element
-        self.text += f"%{self.reg} = load i32, i32* {element_ptr}\n"
+        self.buffer += f"%{self.reg} = load i32, i32* {element_ptr}\n"
         self.reg += 1
 
         # Print the value of the element
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %{self.reg-1})\n"
         self.reg += 1
         
     def print_int_element(self, value):
-        self.text += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 {value})\n"
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 {value})\n"
         self.reg += 1
 
     def scanf_string(self, id:str, l:int):
         self.allocate_string(f"str{self.strr}", l)
-        self.text += f"%{id} = alloca i8*\n"
-        self.text  += f"%{self.reg} = getelementptr inbounds [{l+1} x i8], [{l+1} x i8]* %str{self.strr}, i64 0, i64 0\n"
+        self.buffer += f"%{id} = alloca i8*\n"
+        self.buffer  += f"%{self.reg} = getelementptr inbounds [{l+1} x i8], [{l+1} x i8]* %str{self.strr}, i64 0, i64 0\n"
         self.reg += 1
-        self.text  += f"store i8* %{self.reg-1} , i8** %{id} \n"; 
+        self.buffer  += f"store i8* %{self.reg-1} , i8** %{id} \n"; 
         self.strr += 1
-        self.text  += f"%{self.reg}  = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strs2, i32 0, i32 0), i8* %{self.reg-1} )\n"
+        self.buffer  += f"%{self.reg}  = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strs2, i32 0, i32 0), i8* %{self.reg-1} )\n"
         self.reg += 1
         
     def functionstart(self, id:str):
-        self.text += self.buffer
+        self.buffer += self.buffer
         self.buffer = f"define i32 @{id}() nounwind {{ \n"
         self.main_tmp = self.reg
         self.reg = 1
@@ -566,11 +594,37 @@ class ListenerInterp(LOVEListener):
         self.buffer += f"false{b}:\n"
    
     def icmp(self, id:str, value: str):
-        self.buffer += f"%{self.reg} = load i32, i32* @{id}\n"
+        self.buffer += f"%{self.reg} = load i32, i32* {id}\n"
         self.reg += 1
         self.buffer += f"%{self.reg} = icmp eq i32 %{self.reg-1}, {value}\n"
         self.reg += 1
+        
+    tmp = 1
+        
+    def repeatstart(self, repetitions):
+        self.declare_int(str(self.reg))
+        counter = self.reg
+        self.reg += 1
+        self.assign_int(f"%{str(counter)}", "0")
+        self.br += 1
+        self.buffer += f"br label %cond{self.br}\n"
+        self.buffer += f"cond{self.br}:\n"
+        
+        self.load_i32(f"%{str(counter)}")
+        self.add_int_simple(f"%{self.reg-1}", "1")
+        self.assign_int(f"%{str(counter)}", f"%{self.reg-1}")
+        
+        self.buffer += f"%{self.reg} = icmp slt i32 %{self.reg-2}, {repetitions}\n"
+        self.reg += 1
+
+        self.buffer += f"br i1 %{self.reg -1}, label %true{self.br}, label %false{self.br}\n"
+        self.buffer += f"true{self.br}:\n"
+        self.brstack.append(self.br)
    
+    def repeatend(self):
+        b = self.brstack.pop()
+        self.buffer += f"br label %cond{b}\n"
+        self.buffer += f"false{b}:\n"
         
     def generate(self):
         output = ""

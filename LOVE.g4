@@ -15,7 +15,7 @@ stat: SHOW ID               #show
  	| ID 'LOVE' expr0	    #assign
     | ID 'LOVE' array       #assignArray
     | ID '[' INT ']'        #arrayAccess
-    | REPEAT repetitions stat ENDREPEAT		#repeat
+    | REPEAT repetitions block ENDREPEAT		#repeat
     | IF equal THEN blockif ENDIF 	#if
    ;
 
@@ -57,13 +57,13 @@ fblock: ( stat? NEWLINE )*
 fparam: ID
 ;
 
-FUNCTION: 'function'
+FUNCTION: 'fLOVE'
 ;
 
-ENDFUNCTION:	'endfunction'
+ENDFUNCTION:	'endfLOVE'
 ;
 
-REPEAT: 'repeat'
+REPEAT: 'loop'
 ;
 
 IF:	'if'
@@ -75,7 +75,7 @@ THEN:	'then'
 ENDIF:	'endif'
 ;
 
-ENDREPEAT: 'endrepeat'
+ENDREPEAT: 'endloop'
 ;
 
 GET:    'get'
