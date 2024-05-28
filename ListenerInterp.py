@@ -233,7 +233,8 @@ class ListenerInterp(LOVEListener):
         elif v1.type == Type.STRING and v2.type == Type.STRING:
             self.add_string(v1.name, v1.length, v2.name, v2.length)
             self.stack.append(Value(f"%{self.reg-3}", Type.STRING, 0))
-        
+        elif v1.type != v2.type:
+            raise TypeError(f"Different type addition")    
         elif v1.type == Type.INT: 
             self.add_int(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  
@@ -315,7 +316,6 @@ class ListenerInterp(LOVEListener):
         
         elif v1.type != v2.type:
             raise TypeError(f"Different type division")
-        
         elif v1.type == Type.INT: 
             self.div_i32(v1, v2)
             self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))  

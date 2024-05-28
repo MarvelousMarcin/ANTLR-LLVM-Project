@@ -1,6 +1,5 @@
 a LOVE 2.0
 b LOVE 3
 
-z LOVE a + b
+z LOVE 2.0 / 3
 
-show z
