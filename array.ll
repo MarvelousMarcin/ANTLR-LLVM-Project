@@ -34,6 +34,6 @@ loop_body5:
 store i32 %11, i32* %i
 br label %loop5
 loop_end5:
-%12 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 11)
+%12 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 22)
 ret i32 0 }
 
