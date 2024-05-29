@@ -19,7 +19,7 @@ stat: SHOW ID '.' ID        #showStructMember
     | SHOW ID               #show
     | ID 'HEART' ID         #assignStruct
     | GET ID                #get
-    | GETS  ID              #gets
+    | GETS ID               #gets
  	| ID 'LOVE' expr0	    #assign
     | ID 'LOVE' array       #assignArray
     | ID '.' ID 'LOVE' expr0  #assignStructMember

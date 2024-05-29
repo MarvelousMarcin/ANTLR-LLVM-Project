@@ -94,9 +94,11 @@ class ListenerInterp(LOVEListener):
         elif v.type == Type.FLOAT:
             self.assign_float(self.set_variable(ID, Type.FLOAT), v.name)
         elif v.type == Type.STRING:
-            if ID not in self.variables:
+            if ID not in self.localnames:
                 self.declare_string(ID)
             self.assign_string(ID)
+            self.localnames[ID] = Type.STRING
+            
  
     def exitMult(self, ctx: LOVEParser.MultContext):
         v2:Value = self.stack.pop()
@@ -234,6 +236,7 @@ class ListenerInterp(LOVEListener):
 
     def exitId(self, ctx: LOVEParser.IdContext):
         if ctx.ID() is not None:
+           
             ID = ctx.ID().getText()
             if ID in self.functions:
                 self.call(ID)
@@ -263,7 +266,6 @@ class ListenerInterp(LOVEListener):
         if not type:
             type = self.localnames.get(ID)
             prefix = "%"
-
         if type == Type.INT:
             self.printf_i32(f"{prefix}{ID}")
         elif type == Type.REAL:
@@ -272,7 +274,7 @@ class ListenerInterp(LOVEListener):
             self.float_to_double()
             self.printf_float(f"{prefix}{ID}")
         elif type == Type.STRING:
-            self.printf_string(f"{prefix}{ID}")
+            self.printf_string(f"{ID}")
         elif type == Type.ARRAY:
             self.show_array(ID)
         else:
@@ -281,7 +283,7 @@ class ListenerInterp(LOVEListener):
       
     def exitGets(self, ctx: LOVEParser.GetsContext):
         ID = ctx.ID().getText()
-        self.variables[ID] = Type.STRING
+        self.localnames[ID] = Type.STRING
         self.scanf_string(ID, 16)     
         
     def exitGet(self, ctx: LOVEParser.GetContext):
@@ -291,7 +293,7 @@ class ListenerInterp(LOVEListener):
     def exitAdd(self, ctx: LOVEParser.AddContext):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
-        
+
         if v1.type == Type.ID:
             
             if self.variables[v1.var] == Type.INT:
@@ -373,7 +375,6 @@ class ListenerInterp(LOVEListener):
         v1:Value = self.stack.pop()
 
         if v1.type == Type.ID or v2.type == Type.ID:
-            
             if v1.type == Type.ID :
                 if self.variables[v1.var] == Type.INT:
                     self.div_i32(v1, v2)

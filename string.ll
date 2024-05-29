@@ -10,31 +10,22 @@ declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noa
 @strs2 = constant [5 x i8] c"%10s\00"
 @strs = constant [3 x i8] c"%d\00"
 @.str = private unnamed_addr constant [3 x i8] c"%d\00"
-@marcin = global i32 0
-@kristi = global i32 0
+@str2 = constant [9 x i8] c"ma kota \00"
 define i32 @main() nounwind{
-store i32 69, i32* @marcin
-store i32 69, i32* @kristi
-%1 = load i32, i32* @marcin
-%2 = icmp eq i32 %1, 69
-br i1 %2, label %true1, label %false1
-true1:
-%3 = alloca i32
-store i32 0, i32* %3
-br label %cond2
-cond2:
-%4 = load i32, i32* %3
-%5 = add i32 %4, 1
-store i32 %5, i32* %3
-%6 = icmp slt i32 %4, 3
-br i1 %6, label %true2, label %false2
-true2:
-%7 = load i32, i32* @kristi
-%8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %7)
-br label %cond2
-false2:
-%9 = load i32, i32* @marcin
-br label %false1
-false1:
+%str1 = alloca [510 x i8]
+%b = alloca i8*
+%1 = getelementptr inbounds [17 x i8], [17 x i8]* %str1, i64 0, i64 0
+store i8* %1 , i8** %b 
+%2  = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strs2, i32 0, i32 0), i8* %1 )
+%str2 = alloca [270 x i8]
+%3 = bitcast [9 x i8]* %str2 to i8*
+call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %3, i8* align 1 getelementptr inbounds ([9 x i8], [9 x i8]* @str2, i32 0, i32 0), i64 9, i1 false)
+%ptrstr2 = alloca i8*
+%4 = getelementptr inbounds [9 x i8], [9 x i8]* %str2, i64 0, i64 0
+store i8* %4, i8** %ptrstr2
+%a = alloca i8*
+store i8* %4, i8** %a
+%5 = load i8*, i8** %a
+%6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strps, i32 0, i32 0), i8* %5)
 ret i32 0 }
 
