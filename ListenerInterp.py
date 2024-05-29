@@ -7,6 +7,7 @@ class Type(Enum):
     INT = 1
     ID = auto()
     REAL = auto()
+    FLOAT = auto()
     ARRAY = auto()
     STRING = auto()
     FUNCTION = auto()
@@ -67,12 +68,18 @@ class ListenerInterp(LOVEListener):
                 if type == Type.REAL:
                     self.variables[ID] = Type.REAL
                     self.declare_double(ID, True)
+                if type == Type.FLOAT:
+                    self.variables[ID] = Type.FLOAT
+                    self.declare_float(ID, True)
             id = f"@{ID}"
         elif not self.glob:
             if ID not in self.localnames:
                 if type == Type.INT:
                     self.localnames[ID] = Type.INT
                     self.declare_int(ID, False)
+                if type == Type.FLOAT:
+                    self.variables[ID] = Type.FLOAT
+                    self.declare_float(ID, True)
             id = f"%{ID}" 
         return id
         
@@ -84,6 +91,8 @@ class ListenerInterp(LOVEListener):
             self.assign_int(self.set_variable(ID, Type.INT), v.name)
         elif v.type == Type.REAL:
             self.assign_double(self.set_variable(ID, Type.REAL), v.name)
+        elif v.type == Type.FLOAT:
+            self.assign_float(self.set_variable(ID, Type.FLOAT), v.name)
         elif v.type == Type.STRING:
             if ID not in self.variables:
                 self.declare_string(ID)
@@ -124,6 +133,9 @@ class ListenerInterp(LOVEListener):
 
     def exitReal(self, ctx: LOVEParser.RealContext):
         self.stack.append(Value(ctx.REAL().getText(), Type.REAL, 0))
+        
+    def exitFloat(self, ctx: LOVEParser.FloatContext):
+        self.stack.append(Value(ctx.REAL().getText(), Type.FLOAT, 0))
         
     def exitString(self, ctx: LOVEParser.StringContext):
         tmp:str = ctx.STRING().getText()
@@ -239,6 +251,8 @@ class ListenerInterp(LOVEListener):
                     self.load_i32(f"@{ID}")
                 if self.variables[ID] == Type.REAL:
                     self.load_double(f"@{ID}")
+                if self.variables[ID] == Type.FLOAT:
+                    self.load_float(f"@{ID}")
                 self.stack.append(Value(f"%{self.reg-1}", Type.ID, 0, ID))
             
     def exitShow(self, ctx: LOVEParser.ShowContext):
@@ -254,6 +268,9 @@ class ListenerInterp(LOVEListener):
             self.printf_i32(f"{prefix}{ID}")
         elif type == Type.REAL:
             self.printf_double(f"{prefix}{ID}")
+        elif type == Type.FLOAT:
+            self.float_to_double()
+            self.printf_float(f"{prefix}{ID}")
         elif type == Type.STRING:
             self.printf_string(f"{prefix}{ID}")
         elif type == Type.ARRAY:
@@ -361,16 +378,22 @@ class ListenerInterp(LOVEListener):
                 if self.variables[v1.var] == Type.INT:
                     self.div_i32(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
-                else: 
+                elif self.variables[v1.var] == Type.REAL:
                     self.div_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+                else: 
+                    self.div_float(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.FLOAT, 0))
             elif v2.type == Type.ID:
                 if self.variables[v2.var] == Type.INT:
                     self.div_i32(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))
-                else: 
+                elif self.variables[v1.var] == Type.REAL:
                     self.div_double(v1, v2)
                     self.stack.append(Value(f"%{self.reg-1}", Type.REAL, 0))
+                else: 
+                    self.div_float(v1, v2)
+                    self.stack.append(Value(f"%{self.reg-1}", Type.FLOAT, 0))
         
         elif v1.type != v2.type:
             raise TypeError(f"Different type division")
@@ -426,6 +449,12 @@ class ListenerInterp(LOVEListener):
             self.header_text += f"@{id} = global double 0.0\n"
         else:
             self.buffer += f"%{id} = alloca double\n"
+            
+    def declare_float(self,id, glob=False):
+        if glob:
+            self.header_text += f"@{id} = global float 0.0\n"
+        else:
+            self.buffer += f"%{id} = alloca float\n"
         
     def assign_int(self,id, value):
         self.buffer += f"store i32 {value}, i32* {id}\n"
@@ -435,6 +464,9 @@ class ListenerInterp(LOVEListener):
     
     def assign_double(self,id, value):
         self.buffer += f"store double {value}, double* {id}\n"
+    
+    def assign_float(self,id, value):
+        self.buffer += f"store float {value}, float* {id}\n"
         
     def printf_i32(self,id):
         self.buffer += f"%{self.reg} = load i32, i32* {id}\n"
@@ -445,6 +477,10 @@ class ListenerInterp(LOVEListener):
     def printf_double(self,id):
         self.buffer += f"%{self.reg} = load double, double* {id}\n"
         self.reg += 1
+        self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpd, i32 0, i32 0), double %{self.reg-1})\n"
+        self.reg += 1
+
+    def printf_float(self,id):
         self.buffer += f"%{self.reg} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpd, i32 0, i32 0), double %{self.reg-1})\n"
         self.reg += 1
 
@@ -468,6 +504,10 @@ class ListenerInterp(LOVEListener):
         self.buffer += f"%{self.reg} = load double, double* {id}\n"
         self.reg += 1
         
+    def load_float(self, id):
+        self.buffer += f"%{self.reg} = load float, float* {id}\n"
+        self.reg += 1
+        
     def sub_i32(self, val1:Value, val2:Value):
         self.buffer += f"%{self.reg} = sub i32 {val1.getName()}, {val2.getName()}\n"
         self.reg+=1    
@@ -479,6 +519,10 @@ class ListenerInterp(LOVEListener):
     def div_double(self, val1:Value, val2:Value):
         self.buffer += f"%{self.reg} = fdiv double {val1.getName()}, {val2.getName()}\n"
         self.reg+=1  
+        
+    def div_float(self, val1:Value, val2:Value):
+        self.buffer += f"%{self.reg} = fdiv float {val1.getName()}, {val2.getName()}\n"
+        self.reg+=1
         
     def div_i32(self, val1:Value, val2:Value):
         self.buffer += f"%{self.reg} = sdiv i32 {val1.getName()}, {val2.getName()}\n"
@@ -683,6 +727,11 @@ class ListenerInterp(LOVEListener):
         b = self.brstack.pop()
         self.buffer += f"br label %cond{b}\n"
         self.buffer += f"false{b}:\n"
+        
+    def float_to_double(self):
+        self.buffer += f"%{self.reg} = fpext float %{self.reg-1} to double\n"
+        self.reg+= 1
+        
         
     def generate(self):
         output = ""

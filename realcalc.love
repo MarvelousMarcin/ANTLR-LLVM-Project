@@ -2,6 +2,13 @@ a LOVE 1.0
 b LOVE 2.0
 z LOVE 3.0
 
+p LOVE  (float)1.0
+d LOVE  (float)3.0
+
+c LOVE p / d
+
+show c
+
 x LOVE z / (b + a)
 
 k LOVE 100.0 / 3.0
