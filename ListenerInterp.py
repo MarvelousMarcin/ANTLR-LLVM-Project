@@ -11,14 +11,16 @@ class Type(Enum):
     STRING = auto()
     FUNCTION = auto()
     UNKNOWN = auto()
+    STRUCT = auto()  # Added STRUCT type
 
 class Value:
-    def __init__(self, name, type, length, var="", elements=[]):
+    def __init__(self, name, type, length, var="", elements=[], members={}):
        self.name = name
        self.var = var
        self.type = type
        self.length = length
        self.elements = elements
+       self.members = members  # Added members for struct fields
        
     def __str__(self) -> str:
         return f"{self.name} {self.type} {self.length}"
@@ -34,6 +36,8 @@ class ListenerInterp(LOVEListener):
     main_tmp = 1
     br = 0
     brstack = []
+    structs = {}  # Store struct definitions
+    str_tmp = 0
     
     variables:dict[str, Type] = {}
     localnames: dict[str, Type] = {}
@@ -161,7 +165,60 @@ class ListenerInterp(LOVEListener):
         else:
             print(f"Error: Array '{ID}' is not defined or not of type ARRAY")
 
+    def exitAssignStructMember(self, ctx:LOVEParser.AssignStructMemberContext):
+        struct_name = ctx.ID(0).getText()
+        instance_name = ctx.ID(1).getText()
+        
+        struct = self.structs[struct_name.title()]
+        index_val = struct.index(instance_name)
 
+        v:Value = self.stack.pop()
+        self.buffer += f"%{struct_name+"_"+instance_name} = getelementptr inbounds %struct.{"Person"}, ptr %{struct_name}, i32 0, i32 {index_val}\n"
+        self.buffer += f"store i32 {v.name}, ptr %{struct_name+"_"+instance_name}\n"
+        
+    def exitShowStructMember(self, ctx:LOVEParser.ShowStructMemberContext):
+        struct_name = ctx.ID(0).getText()
+        instance_name = ctx.ID(1).getText()
+        
+        struct = self.structs[struct_name.title()]
+        index_val = struct.index(instance_name)
+        
+        self.buffer += f"%{self.reg} = getelementptr inbounds %struct.Person, ptr %{struct_name}, i32 0, i32 {index_val}\n"
+        self.reg += 1
+        self.buffer += f"%{self.reg} = load i32, ptr %{self.reg-1}, align 4\n"
+        self.reg += 1
+        self.buffer += f"%{self.reg} = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef %{self.reg-1})\n"
+        self.reg += 1
+
+    def enterStruct(self, ctx: LOVEParser.StructContext):
+        struct_name = ctx.ID().getText()
+        self.structs[struct_name] = []
+
+    def exitStructBody(self, ctx: LOVEParser.StructBodyContext):
+        struct_name = ctx.parentCtx.ID().getText()
+        members = []
+        for member in ctx.ID():
+            members.append(member.getText())
+        self.structs[struct_name] = members
+
+        # Generate LLVM struct type definition
+        struct_type = f"%struct.{struct_name} = type {{ "
+        struct_type += ', '.join(["i32" for _ in self.structs[struct_name]])  # Assuming all members are i32 for simplicity
+        struct_type += " }"
+        self.header_text += struct_type + "\n"
+        
+    def exitAssignStruct(self, ctx: LOVEParser.AssignStructContext):
+        struct_name = ctx.ID(0).getText()
+        instance_name = ctx.ID(1).getText()
+        if struct_name in self.structs:
+            members = {member: None for member in self.structs[struct_name]}
+            self.variables[instance_name] = Type.STRUCT
+            self.stack.append(Value(instance_name, Type.STRUCT, 0, members=members))
+
+            # Allocate memory for struct instance
+            self.buffer += f"%{instance_name} = alloca %struct.{struct_name}\n"
+        else:
+            raise ValueError(f"Struct {struct_name} is not defined.")
 
     def exitId(self, ctx: LOVEParser.IdContext):
         if ctx.ID() is not None:
@@ -640,6 +697,7 @@ class ListenerInterp(LOVEListener):
         output += "@strps = constant [4 x i8] c\"%s\\0A\\00\"\n"
         output += "@strs2 = constant [5 x i8] c\"%10s\\00\"\n"
         output += "@strs = constant [3 x i8] c\"%d\\00\"\n"
+        output += "@.str = private unnamed_addr constant [3 x i8] c\"%d\\00\"\n"
         output += self.header_text
         output += "define i32 @main() nounwind{\n"
         output += self.text

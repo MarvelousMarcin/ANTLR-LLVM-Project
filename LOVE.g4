@@ -3,17 +3,26 @@ grammar LOVE;
 prog: block
     ;
 
-block: ( (stat|function)? NEWLINE )* 
+block: ( (stat|function|struct)? NEWLINE )* 
 ;
 
 function: FUNCTION fparam fblock ENDFUNCTION
 ;
 
-stat: SHOW ID               #show
+struct: 'struct' ID structBody 'endstruct'
+    ;
+
+structBody: ( ID? NEWLINE )* 
+    ;
+
+stat: SHOW ID '.' ID        #showStructMember
+    | SHOW ID               #show
+    | ID 'HEART' ID         #assignStruct
     | GET ID                #get
     | GETS  ID              #gets
  	| ID 'LOVE' expr0	    #assign
     | ID 'LOVE' array       #assignArray
+    | ID '.' ID 'LOVE' expr0  #assignStructMember
     | ID '[' INT ']'        #arrayAccess
     | REPEAT repetitions block ENDREPEAT		#repeat
     | IF equal THEN blockif ENDIF 	#if
@@ -37,6 +46,7 @@ expr1:  expr2			    #single1
 
 expr2:   INT			    #int
        | REAL			    #real
+       | '(float)' REAL     #float
        | ID                 #id
        | STRING             #string
        | '(' expr0 ')'		#par

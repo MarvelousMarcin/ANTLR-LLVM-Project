@@ -9,6 +9,7 @@ declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noa
 @strps = constant [4 x i8] c"%s\0A\00"
 @strs2 = constant [5 x i8] c"%10s\00"
 @strs = constant [3 x i8] c"%d\00"
+@.str = private unnamed_addr constant [3 x i8] c"%d\00"
 define i32 @pow() nounwind { 
 %x = alloca i32
 store i32 100, i32* %x

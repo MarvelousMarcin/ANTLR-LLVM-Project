@@ -1,0 +1,18 @@
+struct Person
+     age
+     height
+     bmi
+endstruct
+
+struct Dog
+     age
+endstruct
+
+Person HEART person
+Dog HEART dog
+
+x LOVE 13 * 13
+dog.age LOVE x
+
+show dog.age
+

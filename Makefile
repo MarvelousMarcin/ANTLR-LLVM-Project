@@ -41,6 +41,10 @@ if:
 	lli if.ll
 
 
+struct:
+	python Driver.py struct.love > struct.ll
+	lli struct.ll
+
 clean:
 	rm -f *.ll
 	rm -f *.class

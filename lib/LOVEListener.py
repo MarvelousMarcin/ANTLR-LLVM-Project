@@ -35,12 +35,48 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#struct.
+    def enterStruct(self, ctx:LOVEParser.StructContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#struct.
+    def exitStruct(self, ctx:LOVEParser.StructContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#structBody.
+    def enterStructBody(self, ctx:LOVEParser.StructBodyContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#structBody.
+    def exitStructBody(self, ctx:LOVEParser.StructBodyContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#showStructMember.
+    def enterShowStructMember(self, ctx:LOVEParser.ShowStructMemberContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#showStructMember.
+    def exitShowStructMember(self, ctx:LOVEParser.ShowStructMemberContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#show.
     def enterShow(self, ctx:LOVEParser.ShowContext):
         pass
 
     # Exit a parse tree produced by LOVEParser#show.
     def exitShow(self, ctx:LOVEParser.ShowContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#assignStruct.
+    def enterAssignStruct(self, ctx:LOVEParser.AssignStructContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#assignStruct.
+    def exitAssignStruct(self, ctx:LOVEParser.AssignStructContext):
         pass
 
 
@@ -77,6 +113,15 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#assignArray.
     def exitAssignArray(self, ctx:LOVEParser.AssignArrayContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#assignStructMember.
+    def enterAssignStructMember(self, ctx:LOVEParser.AssignStructMemberContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#assignStructMember.
+    def exitAssignStructMember(self, ctx:LOVEParser.AssignStructMemberContext):
         pass
 
 
@@ -194,6 +239,15 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#real.
     def exitReal(self, ctx:LOVEParser.RealContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#float.
+    def enterFloat(self, ctx:LOVEParser.FloatContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#float.
+    def exitFloat(self, ctx:LOVEParser.FloatContext):
         pass
 
 
