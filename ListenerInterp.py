@@ -353,8 +353,11 @@ class ListenerInterp(LOVEListener):
         v2:Value = self.stack.pop()
         v1:Value = self.stack.pop()
 
+        if v1.type == Type.ID and v2.type == Type.ID:
+            if self.variables[v1.var] !=  self.variables[v2.var]:
+                raise TypeError(f"Different type addition")    
+
         if v1.type == Type.ID:
-            
             if self.variables[v1.var] == Type.INT:
                 self.add_int(v1, v2)
                 self.stack.append(Value(f"%{self.reg-1}", Type.INT, 0))

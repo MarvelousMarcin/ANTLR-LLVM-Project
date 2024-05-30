@@ -1,5 +1,10 @@
 a LOVE 13
 
-repeat 3
+loop 3
+  a LOVE a + 1
   show a
-endrepeat
+  loop 2
+    x LOVE "hey"
+    show x
+  endloop
+endloop

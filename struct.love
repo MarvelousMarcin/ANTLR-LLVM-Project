@@ -11,8 +11,9 @@ endstruct
 Person HEART person
 Dog HEART dog
 
+person.height LOVE 180
+
 x LOVE 13 * 13
 dog.age LOVE x
 
-show dog.age
-
+show person.height

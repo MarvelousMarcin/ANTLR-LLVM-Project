@@ -1,6 +1,6 @@
-fLOVE pow
-  x LOVE 100
-  pow LOVE x * x
-endfLOVE
+a LOVE 3
+b LOVE 4.0
 
-z LOVE pow
+z LOVE a + b
+
+show g
