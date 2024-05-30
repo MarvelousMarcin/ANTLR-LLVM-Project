@@ -1,5 +1,6 @@
-a LOVE 2.0
-b LOVE 3
+fLOVE pow
+  x LOVE 100
+  pow LOVE x * x
+endfLOVE
 
-z LOVE 2.0 / 3
-
+z LOVE pow

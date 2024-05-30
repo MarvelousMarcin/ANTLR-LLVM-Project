@@ -2,5 +2,8 @@ gets b
 
 a LOVE "ma kota "
 
-show a
+z LOVE "ala " + "ma kota "
+
+show b
+show z
 

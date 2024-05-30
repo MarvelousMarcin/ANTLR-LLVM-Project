@@ -40,10 +40,17 @@ if:
 	python Driver.py if.love > if.ll
 	lli if.ll
 
+class:
+	python Driver.py class.love > class.ll
+	lli class.ll
 
 struct:
 	python Driver.py struct.love > struct.ll
 	lli struct.ll
+
+dynamic:
+	python Driver.py dynamic.love > dynamic.ll
+	lli dynamic.ll
 
 clean:
 	rm -f *.ll

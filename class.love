@@ -1,0 +1,16 @@
+fLOVE pow
+  x LOVE 100
+  pow LOVE x * x
+endfLOVE
+
+class Person
+    age
+    call
+endclass
+
+Person CLASS person
+
+person->age LOVECLASS 13
+person->call LOVECLASS pow
+
+show person->age

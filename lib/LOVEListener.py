@@ -35,6 +35,15 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#class.
+    def enterClass(self, ctx:LOVEParser.ClassContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#class.
+    def exitClass(self, ctx:LOVEParser.ClassContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#struct.
     def enterStruct(self, ctx:LOVEParser.StructContext):
         pass
@@ -53,12 +62,30 @@ class LOVEListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LOVEParser#classBody.
+    def enterClassBody(self, ctx:LOVEParser.ClassBodyContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#classBody.
+    def exitClassBody(self, ctx:LOVEParser.ClassBodyContext):
+        pass
+
+
     # Enter a parse tree produced by LOVEParser#showStructMember.
     def enterShowStructMember(self, ctx:LOVEParser.ShowStructMemberContext):
         pass
 
     # Exit a parse tree produced by LOVEParser#showStructMember.
     def exitShowStructMember(self, ctx:LOVEParser.ShowStructMemberContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#showClassMember.
+    def enterShowClassMember(self, ctx:LOVEParser.ShowClassMemberContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#showClassMember.
+    def exitShowClassMember(self, ctx:LOVEParser.ShowClassMemberContext):
         pass
 
 
@@ -77,6 +104,15 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#assignStruct.
     def exitAssignStruct(self, ctx:LOVEParser.AssignStructContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#assignClass.
+    def enterAssignClass(self, ctx:LOVEParser.AssignClassContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#assignClass.
+    def exitAssignClass(self, ctx:LOVEParser.AssignClassContext):
         pass
 
 
@@ -122,6 +158,15 @@ class LOVEListener(ParseTreeListener):
 
     # Exit a parse tree produced by LOVEParser#assignStructMember.
     def exitAssignStructMember(self, ctx:LOVEParser.AssignStructMemberContext):
+        pass
+
+
+    # Enter a parse tree produced by LOVEParser#assignClassMember.
+    def enterAssignClassMember(self, ctx:LOVEParser.AssignClassMemberContext):
+        pass
+
+    # Exit a parse tree produced by LOVEParser#assignClassMember.
+    def exitAssignClassMember(self, ctx:LOVEParser.AssignClassMemberContext):
         pass
 
 

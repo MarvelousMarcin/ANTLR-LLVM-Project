@@ -1,0 +1,9 @@
+a LOVE 13
+b LOVE 16.0
+c LOVE {1,2,3,4}
+d LOVE "ala"
+
+show a
+show b
+show c
+show d

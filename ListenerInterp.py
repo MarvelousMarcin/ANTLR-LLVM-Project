@@ -13,6 +13,8 @@ class Type(Enum):
     FUNCTION = auto()
     UNKNOWN = auto()
     STRUCT = auto()  # Added STRUCT type
+    CLASS = auto()  # Added STRUCT type
+
 
 class Value:
     def __init__(self, name, type, length, var="", elements=[], members={}):
@@ -38,6 +40,7 @@ class ListenerInterp(LOVEListener):
     br = 0
     brstack = []
     structs = {}  # Store struct definitions
+    classes = {}
     str_tmp = 0
     
     variables:dict[str, Type] = {}
@@ -190,6 +193,34 @@ class ListenerInterp(LOVEListener):
         self.buffer += f"%{struct_name+"_"+instance_name} = getelementptr inbounds %struct.{"Person"}, ptr %{struct_name}, i32 0, i32 {index_val}\n"
         self.buffer += f"store i32 {v.name}, ptr %{struct_name+"_"+instance_name}\n"
         
+        
+    def exitAssignClassMember(self, ctx:LOVEParser.AssignClassMemberContext):
+        class_name = ctx.ID(0).getText()
+        instance_name = ctx.ID(1).getText()
+        
+        classs = self.classes[class_name.title()]
+        index_val = classs.index(instance_name)
+
+        v:Value = self.stack.pop()
+
+        
+        self.buffer += f"%{class_name+"_"+instance_name} = getelementptr inbounds %class.{"Person"}, ptr %{class_name}, i32 0, i32 {index_val}\n"
+        self.buffer += f"store i32 {v.name}, ptr %{class_name+"_"+instance_name}\n"
+       
+    def exitShowClassMember(self, ctx:LOVEParser.ShowClassMemberContext):
+        class_name = ctx.ID(0).getText()
+        instance_name = ctx.ID(1).getText()
+        
+        classs = self.classes[class_name.title()]
+        index_val = classs.index(instance_name)
+        
+        self.buffer += f"%{self.reg} = getelementptr inbounds %class.{class_name.title()}, ptr %{class_name}, i32 0, i32 {index_val}\n"
+        self.reg += 1
+        self.buffer += f"%{self.reg} = load i32, ptr %{self.reg-1}, align 4\n"
+        self.reg += 1
+        self.buffer += f"%{self.reg} = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef %{self.reg-1})\n"
+        self.reg += 1   
+        
     def exitShowStructMember(self, ctx:LOVEParser.ShowStructMemberContext):
         struct_name = ctx.ID(0).getText()
         instance_name = ctx.ID(1).getText()
@@ -197,12 +228,29 @@ class ListenerInterp(LOVEListener):
         struct = self.structs[struct_name.title()]
         index_val = struct.index(instance_name)
         
-        self.buffer += f"%{self.reg} = getelementptr inbounds %struct.Person, ptr %{struct_name}, i32 0, i32 {index_val}\n"
+        self.buffer += f"%{self.reg} = getelementptr inbounds %struct.{struct_name.title()}, ptr %{struct_name}, i32 0, i32 {index_val}\n"
         self.reg += 1
         self.buffer += f"%{self.reg} = load i32, ptr %{self.reg-1}, align 4\n"
         self.reg += 1
         self.buffer += f"%{self.reg} = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef %{self.reg-1})\n"
         self.reg += 1
+        
+    def enterClass(self, ctx: LOVEParser.StructContext):
+        class_name = ctx.ID().getText()
+        self.classes[class_name] = []
+        
+    def exitClassBody(self, ctx: LOVEParser.ClassBodyContext):
+        class_name = ctx.parentCtx.ID().getText()
+        members = []
+        for member in ctx.ID():
+            members.append(member.getText())
+        self.classes[class_name] = members
+
+        # Generate LLVM struct type definition
+        class_type = f"%class.{class_name} = type {{ "
+        class_type += ', '.join(["i32" for _ in self.classes[class_name]])  # Assuming all members are i32 for simplicity
+        class_type += " }"
+        self.header_text += class_type + "\n"
 
     def enterStruct(self, ctx: LOVEParser.StructContext):
         struct_name = ctx.ID().getText()
@@ -220,6 +268,17 @@ class ListenerInterp(LOVEListener):
         struct_type += ', '.join(["i32" for _ in self.structs[struct_name]])  # Assuming all members are i32 for simplicity
         struct_type += " }"
         self.header_text += struct_type + "\n"
+        
+    def exitAssignClass(self, ctx: LOVEParser.AssignClassContext):
+        class_name = ctx.ID(0).getText()
+        instance_name = ctx.ID(1).getText()
+        if class_name in self.classes:
+            members = {member: None for member in self.classes[class_name]}
+            self.variables[instance_name] = Type.CLASS
+            self.stack.append(Value(instance_name, Type.CLASS, 0, members=members))
+            self.buffer += f"%{instance_name} = alloca %class.{class_name}\n"
+        else:
+            raise ValueError(f"Struct {class_name} is not defined.")
         
     def exitAssignStruct(self, ctx: LOVEParser.AssignStructContext):
         struct_name = ctx.ID(0).getText()
@@ -555,7 +614,6 @@ class ListenerInterp(LOVEListener):
         
     def allocate_string(self,id, l:int):
         self.buffer += f"%{id} = alloca [{(l+1)*30} x i8]\n"
-
 
     def constant_string(self,content:str):
         l = len(content)+1;     
